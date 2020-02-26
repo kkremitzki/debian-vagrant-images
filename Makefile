@@ -6,7 +6,7 @@ help:
 	@echo "To run this makefile, run:"
 	@echo "   make image-<DIST>-<CLOUD>-<ARCH>"
 	@echo "  WHERE <DIST> is bullseye, buster, stretch or sid"
-	@echo "    And <CLOUD> is azure, ec2, gce, generic, genericcloud, nocloud"
+	@echo "    And <CLOUD> is azure, ec2, gce, vagrant, generic, genericcloud, nocloud"
 	@echo "    And <ARCH> is amd64, arm64, ppc64el"
 	@echo "Set DESTDIR= to write images to given directory."
 

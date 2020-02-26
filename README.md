@@ -77,6 +77,7 @@ be any of the following:
  * `nocloud`: Mostly useful for testing the build process
    itself. Doesn't have cloud-init installed, but instead allows root
    login without a password.
+ * `vagrant`: Disk image to be used inside a Vagrant base Box. 
 
 ## Documentation
 
