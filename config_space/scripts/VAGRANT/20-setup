@@ -37,6 +37,11 @@ chmod 0440 $target/etc/sudoers.d/vagrant
 echo "vagrant" > $target/etc/hostname
 
 #######################################################################
+# generate sshd host keys on first boot
+#######################################################################
+chroot $target systemctl enable generate-sshd-host-keys.service
+
+#######################################################################
 # speed tweaks
 #######################################################################
 
