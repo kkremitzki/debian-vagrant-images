@@ -30,6 +30,8 @@ class TestEtc:
             'tcpdump',
             # From package uuid-runtime
             'uuidd',
+            # For vagrant boxes
+            'vagrant'
         ):
             return
         if name.startswith('_') or name.startswith('systemd-'):
@@ -39,7 +41,7 @@ class TestEtc:
     def test_passwd_shell(self, image_passwd_entry):
         name = image_passwd_entry.name
         shell = image_passwd_entry.shell
-        if shell == '/bin/bash' and name == 'root':
+        if shell == '/bin/bash' and (name == 'root' or name == 'vagrant'):
             return
         if shell == '/bin/sync' and name == 'sync':
             return
@@ -50,6 +52,8 @@ class TestEtc:
     def test_passwd_uid(self, image_passwd_entry):
         name = image_passwd_entry.name
         uid = int(image_passwd_entry.uid)
+        if name == 'vagrant' and uid == 1000:
+            return
         if uid >= 0 and uid < 1000:
             return
         if uid == 65534:
