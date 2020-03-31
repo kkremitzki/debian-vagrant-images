@@ -1,0 +1,11 @@
+#!/bin/sh
+# install packages with priority important and standard, mimicking what 
+# the debian installer is doing
+# note that the debian installer does not install Recommends package
+# cf https://salsa.debian.org/installer-team/base-installer/-/blob/master/library.sh#L152
+
+$ROOTCMD apt-get install --no-install-recommends --yes dctrl-tools
+$ROOTCMD grep-aptavail --no-field-names --show-field Package --field Priority \
+  --regex 'important\|standard' \
+  | $ROOTCMD xargs apt-get install --no-install-recommends --yes
+$ROOTCMD apt-get purge --yes dctrl-tools

@@ -3,14 +3,6 @@
 set -ex
 
 #######################################################################
-# install packages from the 'important' and 'standard' sets
-#######################################################################
-chroot $target apt install --yes dctrl-tools
-chroot $target grep-aptavail --no-field-names --show-field Package --field Priority --regex 'standard\|important' \
-  | chroot $target xargs apt install --yes
-chroot $target apt purge --yes dctrl-tools
-
-#######################################################################
 # setup vagrant user
 #######################################################################
 chroot $target id vagrant >/dev/null 2>&1 || chroot $target useradd --create-home --uid 1000 --shell /bin/bash vagrant
@@ -25,7 +17,7 @@ chroot $target chown -R vagrant:vagrant /home/vagrant/.ssh
 #######################################################################
 # setup passwordless sudo for vagrant user
 #######################################################################
-chroot $target apt install --yes sudo
+chroot $target apt-get install --yes sudo
 cat > $target/etc/sudoers.d/vagrant <<EOF
 vagrant ALL=(ALL) NOPASSWD:ALL
 EOF
