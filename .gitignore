@@ -11,3 +11,5 @@ __pycache__/
 /image-*.build-fai.json
 /image-*.build.junit.xml
 /boxed-*.box
+virtualbox-image-bullseye-vagrant-amd64.box
+virtualbox-image-buster-vagrant-amd64.box

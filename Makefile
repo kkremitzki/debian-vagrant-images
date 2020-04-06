@@ -20,9 +20,13 @@ image-%:
 	  --output $(DESTDIR) \
 	  --override-name image-$*
 
-boxed-%.box:
+libvirt-%.box:
 	$(MAKE) $*
 	utils/vagrant/libvirt/create-vagrant-libvirt-box.sh $*.raw
+
+virtualbox-%.box:
+	$(MAKE) $*
+	utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh $*.raw
 
 clean:
 	rm -rf image-*.* boxed-*.box
