@@ -26,7 +26,7 @@ chmod 0440 $target/etc/sudoers.d/vagrant
 #######################################################################
 # setup hostname
 #######################################################################
-echo "vagrant" > $target/etc/hostname
+echo "debian" > $target/etc/hostname
 
 #######################################################################
 # generate sshd host keys on first boot
