@@ -41,6 +41,19 @@ class Release:
             return True
         return False
 
+    def get_default_grub_class(self, arch, vendor):
+        if arch == 'amd64':
+            if vendor == 'vagrant':
+                return 'GRUB_PC'
+            else:
+                return 'GRUB_CLOUD_AMD64'
+        elif arch == 'ppc64el':
+            return 'GRUB_IEEE1275'
+        elif arch == 'arm64':
+            return 'GRUB_EFI_ARM64'
+        else:
+            logger.error('unknown arch for grub')
+
 
 class Vendor:
     def __init__(self, kw):
@@ -66,13 +79,13 @@ ArchEnum = enum.Enum(  # type:ignore
     'ArchEnum',
     {
         'amd64': {
-            'fai_classes': ('AMD64', 'GRUB_CLOUD_AMD64'),
+            'fai_classes': ('AMD64', ),
         },
         'arm64': {
-            'fai_classes': ('ARM64', 'GRUB_EFI_ARM64'),
+            'fai_classes': ('ARM64', ),
         },
         'ppc64el': {
-            'fai_classes': ('PPC64EL', 'GRUB_IEEE1275'),
+            'fai_classes': ('PPC64EL', ),
         },
     },
     type=Arch,
@@ -272,6 +285,7 @@ class Check:
             self.classes.add('LINUX_IMAGE_CLOUD')
         else:
             self.classes.add('LINUX_IMAGE_BASE')
+        self.classes.add(self.release.get_default_grub_class(self.arch.name, self.vendor.name))
         self.classes.add('LAST')
 
 
