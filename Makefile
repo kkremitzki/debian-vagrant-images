@@ -12,7 +12,7 @@ help:
 
 image-%:
 	umask 022; \
-	./bin/debian-cloud-images build \
+	sudo ./bin/debian-cloud-images build \
 	  $(subst -, ,$*) \
 	  --build-id manual \
 	  --version $(shell date '+%Y%m%d%H%M') \
@@ -20,13 +20,17 @@ image-%:
 	  --output $(DESTDIR) \
 	  --override-name image-$*
 
-libvirt-%.box:
-	$(MAKE) $*
-	utils/vagrant/libvirt/create-vagrant-libvirt-box.sh $*.raw
+test-libvirt-%:
+	test -f $*.raw || $(MAKE) $*
+	test -f libvirt-$*.box || \
+		utils/vagrant/libvirt/create-vagrant-libvirt-box.sh $*.raw
+	utils/vagrant/tests/vagrant-test libvirt $* libvirt-$*.box
 
-virtualbox-%.box:
-	$(MAKE) $*
-	utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh $*.raw
+test-virtualbox-%:
+	test -f $*.raw || $(MAKE) $*
+	test -f virtualbox-$*.box || \
+		utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh $*.raw
+	utils/vagrant/tests/vagrant-test virtualbox $* virtualbox-$*.box
 
 clean:
-	rm -rf image-*.* boxed-*.box
+	rm -rf image-*.* *.box
