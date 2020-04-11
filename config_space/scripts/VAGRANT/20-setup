@@ -24,9 +24,10 @@ EOF
 chmod 0440 $target/etc/sudoers.d/vagrant
 
 #######################################################################
-# setup hostname
+# setup resolvable hostname
 #######################################################################
 echo "debian" > $target/etc/hostname
+sed -i '/127.0.0.1	localhost/a 127.0.0.2	debian' $target/etc/hosts
 
 #######################################################################
 # generate sshd host keys on first boot
