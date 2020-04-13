@@ -18,4 +18,4 @@ set -x
 qemu-img convert -O qcow2 $RAW_DISK box.img
 ln box.img $SCRIPT_DIR/box.img
 tar --directory $SCRIPT_DIR \
-   -czf $BOX box.img Vagrantfile metadata.json
+  --sparse -czvf $BOX box.img Vagrantfile metadata.json

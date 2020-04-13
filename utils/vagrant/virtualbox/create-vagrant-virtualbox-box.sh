@@ -25,4 +25,4 @@ qemu-img convert -O vmdk $RAW_DISK $SCRIPT_DIR/$VMDK
 )
 echo '{"provider": "virtualbox"}' > $SCRIPT_DIR/metadata.json
 tar --directory $SCRIPT_DIR \
-   -czvf $BOX metadata.json box.ovf Vagrantfile $VMDK
+  --sparse -czvf $BOX metadata.json box.ovf Vagrantfile $VMDK

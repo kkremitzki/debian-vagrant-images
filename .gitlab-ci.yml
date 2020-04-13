@@ -1,7 +1,8 @@
 ---
 stages:
-  - source test
+  # - source test
   - build
+  - vagrant package
   - vendor upload
   - upload
 
@@ -11,71 +12,73 @@ variables:
 
 before_script:
   - apt-get update
-  - apt-get install --no-install-recommends -y python3-libcloud python3-marshmallow python3-yaml qemu-utils sudo
+  - >
+    apt-get install --no-install-recommends -y python3-libcloud 
+    python3-marshmallow python3-yaml qemu-utils sudo xz-utils
   - |
     if [ "$CI_DISPOSABLE_ENVIRONMENT" ]; then
       # Workaround unsupported SEEK_HOLE in overlayfs (Docker default)
       mount -t tmpfs none /tmp
     fi
 
-test flake8:
-  stage: source test
-  image: debian:buster
-  script:
-    - >
-      apt-get install --no-install-recommends -y
-      python3-flake8
-    - python3 -m flake8
+# test flake8:
+#   stage: source test
+#   image: debian:buster
+#   script:
+#     - >
+#       apt-get install --no-install-recommends -y
+#       python3-flake8
+#     - python3 -m flake8
 
-test mypy:
-  stage: source test
-  image: debian:bullseye
-  script:
-    - >
-      apt-get install --no-install-recommends -y
-      mypy
-    - mypy src
-  allow_failure: true
+# test mypy:
+#   stage: source test
+#   image: debian:bullseye
+#   script:
+#     - >
+#       apt-get install --no-install-recommends -y
+#       mypy
+#     - mypy src
+#   allow_failure: true
 
-test package:
-  stage: source test
-  image: debian:buster
-  script:
-    - apt-get build-dep -y ./
-    - >
-      apt-get install --no-install-recommends -y
-      lintian
-    - DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc
-    - lintian ../*.changes
+# test package:
+#   stage: source test
+#   image: debian:buster
+#   script:
+#     - apt-get build-dep -y ./
+#     - >
+#       apt-get install --no-install-recommends -y
+#       lintian
+#     - DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc
+#     - lintian ../*.changes
 
-test pytest:
-  stage: source test
-  image: debian:buster
-  script:
-    - >
-      apt-get install --no-install-recommends -y
-      python3-pytest python3-pytest-cov
-    - >
-      PYTHONPATH=src
-      py.test-3
-      -vrxXs
-      --color=yes
-      --cov=src --cov-report=term --cov-report=html:coverage
-      --junit-xml=junit.xml
-      tests
-  artifacts:
-    paths:
-      - coverage/
-    reports:
-      junit: junit.xml
+# test pytest:
+#   stage: source test
+#   image: debian:buster
+#   script:
+#     - >
+#       apt-get install --no-install-recommends -y
+#       python3-pytest python3-pytest-cov
+#     - >
+#       PYTHONPATH=src
+#       py.test-3
+#       -vrxXs
+#       --color=yes
+#       --cov=src --cov-report=term --cov-report=html:coverage
+#       --junit-xml=junit.xml
+#       tests
+#   artifacts:
+#     paths:
+#       - coverage/
+#     reports:
+#       junit: junit.xml
 
-test pytest latest:
-  stage: source test
-  image: python:slim
-  before_script:
-    - pip install -e .
-  script:
-    - python3 ./setup.py pytest
+# test pytest latest:
+#   stage: source test
+#   image: python:slim
+#   before_script:
+#     - pip install -e .
+#   script:
+#     - python3 ./setup.py pytest
 
 .build:
   stage: build
@@ -83,7 +86,9 @@ test pytest latest:
   script:
     - >
       apt-get install --no-install-recommends -y
-      binfmt-support ca-certificates debsums dosfstools fai-server fai-setup-storage make python3-pytest qemu-user-static qemu-utils sudo udev
+      binfmt-support ca-certificates debsums dosfstools fai-server
+      fai-setup-storage python3-pytest qemu-user-static sudo
+      udev
     - |
       if [ "$CI_DISPOSABLE_ENVIRONMENT" ]; then
         # Some of our build environments run with SELinux enabled, make sure it is detected by all the tools
@@ -101,14 +106,14 @@ test pytest latest:
       --build-id ${CLOUD_IMAGE_BUILD_ID}
       --build-type dev
       ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
-    - 'xz -vk5T0 *.tar'
+    - 'xz -vk5T0 *.raw'
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}
     expire_in: 7 days
     paths:
+      - '*.raw.xz'
       - '*.build.json'
       - '*.info'
-      - '*.tar.xz'
     reports:
       junit: '*.build.junit.xml'
   allow_failure: true
@@ -129,30 +134,85 @@ test pytest latest:
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
 
-vagrant stretch amd64 build:
-  extends: .vagrant build
-  variables:
-    CLOUD_ARCH: amd64
-    CLOUD_RELEASE: stretch
-    CLOUD_VENDOR: vagrant
+# vagrant stretch amd64 build:
+#   extends: .vagrant build
+#   variables:
+#     CLOUD_ARCH: amd64
+#     CLOUD_RELEASE: stretch
+#     CLOUD_VENDOR: vagrant
 
-vagrant buster amd64 build:
-  extends: .vagrant build
-  variables:
-    CLOUD_ARCH: amd64
-    CLOUD_RELEASE: buster
-    CLOUD_VENDOR: vagrant
+# vagrant buster amd64 build:
+#  extends: .vagrant build
+#  variables:
+#    CLOUD_ARCH: amd64
+#    CLOUD_RELEASE: buster
+#    CLOUD_VENDOR: vagrant
 
 vagrant bullseye amd64 build:
-  extends: .vagrant build
+ extends: .vagrant build
+ variables:
+   CLOUD_ARCH: amd64
+   CLOUD_RELEASE: bullseye
+   CLOUD_VENDOR: vagrant
+
+#vagrant sid amd64 build:
+#  extends: .vagrant build
+#  variables:
+#    CLOUD_ARCH: amd64
+#    CLOUD_RELEASE: sid
+#    CLOUD_VENDOR: vagrant
+
+.virtualbox box:
+  stage: vagrant package
+  image: debian:buster
+  script:
+    - >
+      apt-get install --no-install-recommends -y
+      libxml-writer-perl libguestfs-perl uuid-runtime linux-image-amd64
+    - 'xz -d *.raw.xz'
+    - >
+      echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+    - >
+      utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+  artifacts:
+    name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
+    expire_in: 7 days
+    paths:
+      - '*.box'
+      - '*.build.json'
+      - '*.info'
+
+.libvirt box:
+  stage: vagrant package
+  image: debian:buster
+  script:
+    - 'xz -d *.raw.xz'
+    - >
+      echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+    - > 
+      utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+  artifacts:
+    name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt
+    expire_in: 7 days
+    paths:
+      - '*.box'
+      - '*.build.json'
+      - '*.info'
+
+vagrant bullseye amd64 virtualbox box:
+  extends: .virtualbox box
   variables:
     CLOUD_ARCH: amd64
     CLOUD_RELEASE: bullseye
     CLOUD_VENDOR: vagrant
 
-vagrant sid amd64 build:
-  extends: .vagrant build
+vagrant bullseye amd64 libvirt box:
+  extends: .libvirt box
   variables:
     CLOUD_ARCH: amd64
-    CLOUD_RELEASE: sid
+    CLOUD_RELEASE: bullseye
     CLOUD_VENDOR: vagrant
