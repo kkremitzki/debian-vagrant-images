@@ -3,7 +3,7 @@
 DESTDIR = .
 # mimics variables which are set by gitlab-ci
 CLOUD_IMAGE_BUILD_ID = vagrant-cloud-images-master
-CI_PIPELINE_IID = 1
+export CI_PIPELINE_IID = 1
 # this is how ./bin/debian-cloud-images build defines a version
 VERSION := $(shell date '+%Y%m%d')-$(CI_PIPELINE_IID)
 
@@ -17,8 +17,7 @@ help:
 
 %:
 	umask 022; \
-	sudo CI_PIPELINE_IID=$(CI_PIPELINE_IID) \
-	  ./bin/debian-cloud-images build \
+	./bin/debian-cloud-images build \
 	  $(subst -, ,$*) \
 	  --build-id $(CLOUD_IMAGE_BUILD_ID) \
 	  --build-type official
@@ -28,8 +27,7 @@ test-libvirt-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 
 	# if box archive is missing, package it
-	export CI_PIPELINE_IID=1; \
-		test -f libvirt-debian-$*-official-$(VERSION).box || \
+	test -f libvirt-debian-$*-official-$(VERSION).box || \
 	  utils/vagrant/libvirt/create-libvirt-libvirt-box.sh \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
@@ -45,7 +43,7 @@ upload-libvirt-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 
 	# if box archive is missing, package it
-	export CI_PIPELINE_IID=1; test -f libvirt-debian-$*-official-$(VERSION).box || \
+	test -f libvirt-debian-$*-official-$(VERSION).box || \
 	  utils/vagrant/libvirt/create-vagrant-libvirt-box.sh \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
@@ -56,7 +54,7 @@ upload-libvirt-%:
 
 test-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
-	export CI_PIPELINE_IID=1; test -f virtualbox-debian-$*-official-$(VERSION).box || \
+	test -f virtualbox-debian-$*-official-$(VERSION).box || \
 	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	utils/vagrant/tests/vagrant-test virtualbox $* \
@@ -64,7 +62,8 @@ test-virtualbox-%:
 
 upload-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
-	export CI_PIPELINE_IID=1; test -f libvirt-debian-$*-official-$(VERSION).box || \
+
+	test -f libvirt-debian-$*-official-$(VERSION).box || \
 	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	trickle -u 128 vagrant cloud publish --force debian-sandbox/$(word 1, $(subst -, ,$*))64 \
