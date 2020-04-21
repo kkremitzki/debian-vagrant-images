@@ -95,21 +95,20 @@ before_script:
         if [ -d /sys/fs/selinux ]; then mount -t selinuxfs none /sys/fs/selinux; mkdir -p /etc/selinux; touch /etc/selinux/config; fi
       fi
     - >
-      echo
+      echo CI_PIPELINE_IID;
       debian-cloud-images build
       --build-id ${CLOUD_IMAGE_BUILD_ID}
-      --build-type dev
-      --version ${CI_PIPELINE_IID}
+      --build-type official
       ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
     - >
       ./bin/debian-cloud-images build
       --build-id ${CLOUD_IMAGE_BUILD_ID}
-      --build-type dev
+      --build-type official
       ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
     - 'xz -vk5T0 *.raw'
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}
-    expire_in: 7 days
+    expire_in: 2 days
     paths:
       - '*.raw.xz'
       - '*.build.json'
@@ -177,13 +176,13 @@ vagrant bullseye amd64 build:
     - 'xz -d *.raw.xz'
     - >
       echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - >
       utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
-    expire_in: 7 days
+    expire_in: 2 days
     paths:
       - '*.box'
       - '*.build.json'
@@ -201,13 +200,13 @@ vagrant bullseye amd64 build:
     - 'xz -d *.raw.xz'
     - >
       echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - > 
       utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-dev-${CLOUD_IMAGE_BUILD_ID}-${CI_PIPELINE_IID}.raw
+      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt
-    expire_in: 7 days
+    expire_in: 2 days
     paths:
       - '*.box'
       - '*.build.json'
