@@ -1,6 +1,9 @@
-# FAI Cloud image builder
+# FAI vagrant image builder
 
-This repository aims to build Debian images for all cloud providers
+This repository aims to build the Debian Vagrant base boxes available at 
+https://app.vagrantup.com/debian  
+See that URL for the end user documentation.
+This repository is based on a fork of https://salsa.debian.org/cloud-team/debian-cloud-images and tries to minimize changes to vagrant specific changes when possible.
 
 ## Getting started
 
@@ -10,7 +13,7 @@ the recommends (which avoids turning your host into a DHCP server!).
 You also need python3-libcloud from Buster or newer.
 
 ```
-  # git clone https://salsa.debian.org/cloud-team/debian-cloud-images.git
+  # git clone https://salsa.debian.org/cloud-team/debian-vagrant-images.git
   # sudo apt install --no-install-recommends ca-certificates debsums dosfstools \
     fai-server fai-setup-storage make python3 python3-libcloud python3-marshmallow \
     python3-pytest python3-yaml qemu-utils udev
@@ -21,137 +24,34 @@ You also need python3-libcloud from Buster or newer.
 Example 1:
 
 ```
-   # make image-stretch-nocloud-amd64
+   # make stretch-vagrant-amd64
 ```
 
 This will create some log output and the following files:
 
-- image-stretch-nocloud-amd64.build.json
-- image-stretch-nocloud-amd64.info
-- image-stretch-nocloud-amd64.raw
-- image-stretch-nocloud-amd64.raw.tar
+- debian-stretch-nocloud-amd64-official-20200421-1.build.json
+- debian-stretch-nocloud-amd64-official-20200421-1.info
+- debian-stretch-nocloud-amd64-official-20200421-1.raw
+- debian-stretch-nocloud-amd64-official-20200421-1.raw.tar
 
-Example 2:
+## Boxes creation
 
+To convert the raw disk images into a usable vagrant box you will need
 ```
-    # make image-buster-genericcloud-amd64
-```
-
-- image-buster-genericcloud-amd64.build.json
-- image-buster-genericcloud-amd64.info
-- image-buster-genericcloud-amd64.raw
-- image-buster-genericcloud-amd64.tar
-
-These images can be used with QEMU-KVM, Virtualbox or any other virtualization
-backend that support raw disk images.
-
-You can login as root on the VM console without a password (but not over
-SSH), and there are no other users. You can add new users using `adduser` as
-usual, and you probably want to add them to the `sudo` group.
-
-After the disk image is created you can try it with kvm, and wait 5s for the
-boot sequence to start:
-
-```
-    # kvm -nic user,model=virtio -m 1024 -drive format=raw,file=image-buster-genericcloud-amd64.raw
+# apt install libxml-writer-perl libguestfs-perl uuid-runtime
 ```
 
-## Supported image types
-
-As shown above, various types of images can be built for different use
-cases. Each type of image can be built with the following command:
-
+## Box creation and E2E test suite
+To run the test suite you will also need
 ```
-    # make <suite>-image-<type>
+apt install vagrant vagrant-libvirt virtualbox
 ```
 
-where `<suite>` is one of `stretch`, `buster`, or `sid`. `<type>` can
-be any of the following:
-
- * `azure`: Optimized for Microsoft's cloud computing platform Azure
- * `ec2`: Optimized for the Amazon Elastic Compute Cloud (EC2)
- * `gce`: Optimized for the Google Cloud Engine
- * `generic`: Should run in any environment
- * `genericcloud`: Should run in any virtualised environment. Is
-   smaller than `generic` by excluding drivers for physical hardware.
- * `nocloud`: Mostly useful for testing the build process
-   itself. Doesn't have cloud-init installed, but instead allows root
-   login without a password.
- * `vagrant`: Disk image to be used inside a Vagrant base Box. 
-
-## Documentation
-
- * [Details about creating images](doc/details.md)
- * https://fai-project.org/fai-guide/
- * https://noah.meyerhans.us/blog/2017/02/10/using-fai-to-customize-and-build-your-own-cloud-images/
-
-## New cloud vendor how-to
-
-First of all, we are pretty confident that `generic-vm-image` should boot
-mostly everywhere. If you really need adjustments for your image, start looking
-at the directory structure and only drop in adjustments where really required.
-Our CLOUD (base) class should already take care of the most of what is needed
-for a cloud image.
-
-## Uploader
-
-Uploaders typically need some variables set with credentials or targets.
-
- * `$CLOUD_UPLOAD_DEV_CONFIG`: File variable containing a config file.
-
-### Amazon EC2
-
- * `$CLOUD_UPLOAD_EC2_DEV_ENABLED`: Set to `1` to upload and create images during development.
- * `$AWS_ACCESS_KEY_ID`
- * `$AWS_SECRET_ACCESS_KEY`
-
+Then if you call
 ```
----
-ec2:
-  image:
-    regions:
-    - REGION
-    tags:
-    - TAG=VALUE
-  storage:
-    name: BUCKET
+make test-virtualbox-stretch-vagrant-amd64
 ```
+a box called virtualbox-debian-stretch-vagrant-amd64-official-20200421-1.box will be created in the current directory, and a test environment based on this box will run the e2e tests.
 
-### Google Compute Engine
 
- * `$GOOGLE_APPLICATION_CREDENTIALS`: File variable containing service account credentials.
- * `$CLOUD_UPLOAD_GCE_DEV_ENABLED`: Set to `1` to upload and create images during development.
 
-#### Config file example
-
-```
----
-gce:
-  image:
-    project: project
-  storage:
-    name: NAME
-```
-
-### Microsoft Azure
-
- * `$CLOUD_UPLOAD_AZURE_DEV_ENABLED`: Set to `1` to upload images during development.
-
-#### Config file example
-
-```
----
-azure:
-  auth:
-    client: OBJECT
-    secret: SECRET
-  image:
-    tenant: TENANT
-    subscription: SUBSCRIPTION
-    group: GROUP
-  storage:
-    tenant: TENANT
-    subscription: SUBSCRIPTION
-    group: GROUP
-    name: NAME
-```
