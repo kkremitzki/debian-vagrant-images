@@ -95,7 +95,7 @@ before_script:
         if [ -d /sys/fs/selinux ]; then mount -t selinuxfs none /sys/fs/selinux; mkdir -p /etc/selinux; touch /etc/selinux/config; fi
       fi
     - >
-      echo CI_PIPELINE_IID
+      echo $CI_PIPELINE_IID
       echo debian-cloud-images build
       --build-id ${CLOUD_IMAGE_BUILD_ID}
       --build-type official
@@ -184,7 +184,8 @@ vagrant bullseye amd64 build:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
     expire_in: 2 days
     paths:
-      - '*.box'
+      # this fails with Uploading artifacts to coordinator... too large archive (HTTP 413)
+      #- '*.box'
       - '*.build.json'
       - '*.info'
 
@@ -208,7 +209,8 @@ vagrant bullseye amd64 build:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt
     expire_in: 2 days
     paths:
-      - '*.box'
+      # this fails with Uploading artifacts to coordinator... too large archive (HTTP 413)
+      #- '*.box'
       - '*.build.json'
       - '*.info'
 
