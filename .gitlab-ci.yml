@@ -163,6 +163,11 @@ vagrant bullseye amd64 build:
 #    CLOUD_VENDOR: vagrant
 
 .virtualbox box:
+  rules:
+  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
+    when: on_success
+  - if: '$CI_MERGE_REQUEST_ID == null'
+    when: manual
   stage: vagrant package
   image: debian:buster
   script:
@@ -185,6 +190,11 @@ vagrant bullseye amd64 build:
       - '*.info'
 
 .libvirt box:
+  rules:
+  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
+    when: on_success
+  - if: '$CI_MERGE_REQUEST_ID == null'
+    when: manual
   stage: vagrant package
   image: debian:buster
   script:
