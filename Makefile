@@ -28,7 +28,7 @@ test-libvirt-%:
 
 	# if box archive is missing, package it
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/libvirt/create-libvirt-libvirt-box.sh \
+	  utils/vagrant/libvirt/create-vagrant-libvirt-box.sh \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
 	# boot a Vagrant env based on that box, run E2E tests
