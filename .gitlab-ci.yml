@@ -95,8 +95,8 @@ before_script:
         if [ -d /sys/fs/selinux ]; then mount -t selinuxfs none /sys/fs/selinux; mkdir -p /etc/selinux; touch /etc/selinux/config; fi
       fi
     - >
-      echo CI_PIPELINE_IID;
-      debian-cloud-images build
+      echo CI_PIPELINE_IID
+      echo debian-cloud-images build
       --build-id ${CLOUD_IMAGE_BUILD_ID}
       --build-type official
       ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
