@@ -1,6 +1,5 @@
 # path to the config space shoud be absolute, see fai.conf(5)
 
-DESTDIR = .
 # mimics variables which are set by gitlab-ci
 CLOUD_IMAGE_BUILD_ID = vagrant-cloud-images-master
 export CI_PIPELINE_IID = 1
@@ -13,7 +12,6 @@ help:
 	@echo "  WHERE <DIST> is bullseye, buster, stretch or sid"
 	@echo "    And <CLOUD> is azure, ec2, gce, generic, genericcloud, nocloud, vagrant"
 	@echo "    And <ARCH> is amd64, arm64, ppc64el"
-	@echo "Set DESTDIR= to write images to given directory."
 
 %:
 	umask 022; \
