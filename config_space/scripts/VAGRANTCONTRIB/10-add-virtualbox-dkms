@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+echo "installing virtualbox guest additions"
+$ROOTCMD apt-get --yes --no-install-recommends install devscripts linux-headers-amd64 liburi-perl
+VBOXVER=$($ROOTCMD rmadison --suite unstable virtualbox-guest-dkms \
+	| egrep --only-matching '[0-9]+\.[0-9]+\.[0-9]+-dfsg-[0-9]+')
+
+$ROOTCMD wget http://ftp.debian.org/debian/pool/contrib/v/virtualbox/virtualbox-guest-dkms_${VBOXVER}_all.deb
+$ROOTCMD wget http://ftp.debian.org/debian/pool/contrib/v/virtualbox/virtualbox-guest-utils_${VBOXVER}_amd64.deb
+$ROOTCMD dpkg -i virtualbox-guest-dkms_${VBOXVER}_all.deb virtualbox-guest-utils_${VBOXVER}_amd64.deb || true
+$ROOTCMD apt-get --yes -f --no-install-recommends install
+$ROOTCMD apt-get --yes remove --auto-remove --purge linux-headers-amd64 devscripts
+$ROOTCMD apt-get --yes clean
+$ROOTCMD rm virtualbox-guest-dkms_${VBOXVER}_all.deb virtualbox-guest-utils_${VBOXVER}_amd64.deb
