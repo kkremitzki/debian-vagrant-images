@@ -154,6 +154,27 @@ vagrant bullseye amd64 build:
    CLOUD_RELEASE: bullseye
    CLOUD_VENDOR: vagrant
 
+vagrantcontrib stretch amd64 build:
+  extends: .vagrant build
+  variables:
+    CLOUD_ARCH: amd64
+    CLOUD_RELEASE: stretch
+    CLOUD_VENDOR: vagrantcontrib
+
+vagrantcontrib buster amd64 build:
+ extends: .vagrant build
+ variables:
+   CLOUD_ARCH: amd64
+   CLOUD_RELEASE: buster
+   CLOUD_VENDOR: vagrantcontrib
+
+vagrantcontrib bullseye amd64 build:
+ extends: .vagrant build
+ variables:
+   CLOUD_ARCH: amd64
+   CLOUD_RELEASE: bullseye
+   CLOUD_VENDOR: vagrantcontrib
+
 .virtualbox box:
   rules:
   - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
