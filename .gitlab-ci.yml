@@ -168,10 +168,10 @@ vagrant bullseye amd64 build:
       libxml-writer-perl libguestfs-perl uuid-runtime linux-image-amd64
     - 'xz -d *.raw.xz'
     - >
-      echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - >
-      utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
@@ -193,10 +193,10 @@ vagrant bullseye amd64 build:
   script:
     - 'xz -d *.raw.xz'
     - >
-      echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - > 
-      utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt

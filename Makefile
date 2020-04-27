@@ -28,7 +28,7 @@ test-libvirt-%:
 
 	# if box archive is missing, package it
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/libvirt/create-vagrant-libvirt-box.sh \
+	  utils/vagrant/libvirt/create-vagrant-libvirt-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
 	# boot a Vagrant env based on that box, run E2E tests
@@ -44,7 +44,7 @@ upload-libvirt-%:
 
 	# if box archive is missing, package it
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/libvirt/create-vagrant-libvirt-box.sh \
+	  utils/vagrant/libvirt/create-vagrant-libvirt-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
 	#  upload box to vagrant cloud, using trickle to limit bandwith
@@ -55,7 +55,7 @@ upload-libvirt-%:
 test-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 	test -f virtualbox-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh \
+	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	utils/vagrant/tests/vagrant-test virtualbox $* \
 	  virtualbox-debian-$*-official-$(VERSION).box
@@ -64,7 +64,7 @@ upload-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh \
+	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	trickle -u 128 vagrant cloud publish --force debian-sandbox/$(word 1, $(subst -, ,$*))64 \
 		$$(date '+%Y%m%d')-$${CI_PIPELINE_IID} virtualbox \

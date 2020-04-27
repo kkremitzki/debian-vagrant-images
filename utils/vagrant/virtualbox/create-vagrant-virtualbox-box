@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+import os
+import signal
+import sys
+import subprocess
+import tempfile
+from shutil import copy
+from shutil import rmtree
+from pathlib import Path
+from os import path
+
+# TODO: use different vagrantfile base on sync mechanism
+
+if len(sys.argv) != 2 or not path.exists(sys.argv[1]):
+    print(f"could not read disk image to convert", file=sys.stderr)
+    sys.exit(1)
+
+rawdisk = sys.argv[1]
+scriptdir = path.abspath(Path(__file__).parent)
+startdir = os.getcwd()
+builddir = tempfile.mkdtemp()
+tar_members = []
+
+
+def cleanup(signal, frame):
+    os.chdir(startdir)
+    rmtree(builddir)
+    sys.exit(127)
+
+
+signal.signal(signal.SIGINT, cleanup)
+signal.signal(signal.SIGTERM, cleanup)
+
+
+# metadata
+mdata = 'metadata.json'
+fd = open(path.join(builddir, mdata), 'w')
+fd.write('{"provider": "virtualbox"}')
+fd.close()
+tar_members.append(mdata)
+
+# Vagrantfile
+vfile = 'Vagrantfile'
+copy(path.join(scriptdir, vfile + '.in'), path.join(builddir, vfile))
+tar_members.append(vfile)
+
+# vmdk
+vmdk = 'box.vmdk'
+disk_convert = ('qemu-img', 'convert', '-O', 'vmdk', rawdisk,
+                path.join(builddir, vmdk))
+subprocess.run(disk_convert)
+tar_members.append(vmdk)
+
+# ovf
+ovf = 'box.ovf'
+os.chdir(builddir)
+ovf_generate = (path.join(scriptdir, 'import2vbox'), '--memory', '512',
+                '--vcpu', '2', vmdk)
+subprocess.run(ovf_generate)
+os.chdir(startdir)
+tar_members.append(ovf)
+
+# tar everything
+box = f"virtualbox-{path.splitext(path.basename(rawdisk))[0]}.box"
+tar = ['tar', '--directory', builddir, '--sparse', '-czvf', box] + tar_members
+subprocess.run(tar)
+
+rmtree(builddir)
+sys.exit(0)

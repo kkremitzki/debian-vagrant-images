@@ -10,12 +10,13 @@ BOX="libvirt-$(basename ${RAW_DISK} .raw).box"
 SCRIPT_DIR="$(dirname $0)"
 
 cleanup() {
-  rm -f box.img $SCRIPT_DIR/box.img
+  rm -f box.img $SCRIPT_DIR/box.img $SCRIPT_DIR/Vagrantfile
 }
 trap cleanup INT TERM EXIT
 
 set -x
 qemu-img convert -O qcow2 $RAW_DISK box.img
 ln box.img $SCRIPT_DIR/box.img
+cp $SCRIPT_DIR/Vagrantfile.in $SCRIPT_DIR/Vagrantfile
 tar --directory $SCRIPT_DIR \
   --sparse -czvf $BOX box.img Vagrantfile metadata.json
