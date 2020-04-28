@@ -9,61 +9,99 @@ from shutil import rmtree
 from pathlib import Path
 from os import path
 
-# TODO: use different vagrantfile base on sync mechanism
 
-if len(sys.argv) != 2 or not path.exists(sys.argv[1]):
-    print(f"could not read disk image to convert", file=sys.stderr)
+def main():
+    if len(sys.argv) != 2 or not path.exists(sys.argv[1]):
+        print(f"could not read disk image to convert", file=sys.stderr)
+        sys.exit(1)
+
+    rawdisk = sys.argv[1]
+    scriptdir = path.abspath(Path(__file__).parent)
+    startdir = os.getcwd()
+    builddir = tempfile.mkdtemp()
+    tarfiles = []
+
+    tarfiles.append(create_metadata(builddir))
+    diskinfos = parsedisk(rawdisk)
+    tarfiles.append(create_vagrantfile(scriptdir, builddir, diskinfos['vendor']))
+    #TODO: catch return code of create_vmdk and create_ovf subprocess commands
+    vmdk = create_vmdk(rawdisk, builddir)
+    tarfiles.append(vmdk)
+    tarfiles.append(create_ovf(startdir, scriptdir, vmdk, builddir))
+    tarball = f"virtualbox-{path.splitext(path.basename(rawdisk))[0]}.box"
+    create_tarball(tarfiles, tarball, builddir)
+
+    def cleanup(signal, frame):
+        os.chdir(startdir)
+        rmtree(builddir)
+        sys.exit(127)
+
+    signal.signal(signal.SIGINT, cleanup)
+    signal.signal(signal.SIGTERM, cleanup)
+
+    rmtree(builddir)
+    sys.exit(0)
+
+
+def create_metadata(builddir):
+    mdata = 'metadata.json'
+    fd = open(path.join(builddir, mdata), 'w')
+    fd.write('{"provider": "virtualbox"}')
+    fd.close()
+    return mdata
+
+
+def create_vagrantfile(scriptdir, builddir, vendor):
+    vfile = 'Vagrantfile'
+    if vendor == 'vagrantcontrib':
+      vfile = 'Vagrantfile-contrib'
+    copy(path.join(scriptdir, vfile + '.in'), path.join(builddir, vfile))
+    return vfile
+
+
+def create_vmdk(rawdisk, builddir):
+    vmdk = 'box.vmdk'
+    disk_convert = ('qemu-img', 'convert', '-O', 'vmdk', rawdisk,
+                    path.join(builddir, vmdk))
+    subprocess.run(disk_convert)
+    return vmdk
+
+
+def create_ovf(startdir, scriptdir, vmdk, builddir):
+    ovf = 'box.ovf'
+    os.chdir(builddir)
+    ovf_generate = (path.join(scriptdir, 'import2vbox'), '--memory', '512',
+                    '--vcpu', '2', vmdk)
+    subprocess.run(ovf_generate)
+    os.chdir(startdir)
+    return ovf
+
+
+def create_tarball(tarfiles, archivename, builddir):
+    tar = ['tar', '--directory', builddir, '--sparse',
+           '-czvf', archivename] + tarfiles
+    subprocess.run(tar)
+
+
+def parsedisk(diskname):
+  filename = path.splitext(path.basename(diskname))[0]
+  infos = filename.split('-')
+  if len(infos) is not 7:
+    print(f"unable to parse diskname {diskname}", file=sys.stderr)
     sys.exit(1)
 
-rawdisk = sys.argv[1]
-scriptdir = path.abspath(Path(__file__).parent)
-startdir = os.getcwd()
-builddir = tempfile.mkdtemp()
-tar_members = []
+  info = {
+    'os': infos[0],
+    'dist': infos[1],
+    'vendor': infos[2],
+    'arch': infos[3],
+    'buildtype': infos[4],
+    'builddate': infos[5],
+    'buildincrement': infos[6],
+  }
+
+  return info
 
 
-def cleanup(signal, frame):
-    os.chdir(startdir)
-    rmtree(builddir)
-    sys.exit(127)
-
-
-signal.signal(signal.SIGINT, cleanup)
-signal.signal(signal.SIGTERM, cleanup)
-
-
-# metadata
-mdata = 'metadata.json'
-fd = open(path.join(builddir, mdata), 'w')
-fd.write('{"provider": "virtualbox"}')
-fd.close()
-tar_members.append(mdata)
-
-# Vagrantfile
-vfile = 'Vagrantfile'
-copy(path.join(scriptdir, vfile + '.in'), path.join(builddir, vfile))
-tar_members.append(vfile)
-
-# vmdk
-vmdk = 'box.vmdk'
-disk_convert = ('qemu-img', 'convert', '-O', 'vmdk', rawdisk,
-                path.join(builddir, vmdk))
-subprocess.run(disk_convert)
-tar_members.append(vmdk)
-
-# ovf
-ovf = 'box.ovf'
-os.chdir(builddir)
-ovf_generate = (path.join(scriptdir, 'import2vbox'), '--memory', '512',
-                '--vcpu', '2', vmdk)
-subprocess.run(ovf_generate)
-os.chdir(startdir)
-tar_members.append(ovf)
-
-# tar everything
-box = f"virtualbox-{path.splitext(path.basename(rawdisk))[0]}.box"
-tar = ['tar', '--directory', builddir, '--sparse', '-czvf', box] + tar_members
-subprocess.run(tar)
-
-rmtree(builddir)
-sys.exit(0)
+if __name__ == '__main__':
+    main()
