@@ -1,5 +1,6 @@
 # path to the config space shoud be absolute, see fai.conf(5)
 
+DESTDIR = .
 # mimics variables which are set by gitlab-ci
 CLOUD_IMAGE_BUILD_ID = vagrant-cloud-images-master
 export CI_PIPELINE_IID = 1
@@ -12,6 +13,7 @@ help:
 	@echo "  WHERE <DIST> is bullseye, buster, stretch or sid"
 	@echo "    And <CLOUD> is azure, ec2, gce, generic, genericcloud, nocloud, vagrant"
 	@echo "    And <ARCH> is amd64, arm64, ppc64el"
+	@echo "Set DESTDIR= to write images to given directory."
 
 %:
 	umask 022; \
@@ -26,7 +28,7 @@ test-libvirt-%:
 
 	# if box archive is missing, package it
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/libvirt/create-vagrant-libvirt-box.sh \
+	  utils/vagrant/libvirt/create-vagrant-libvirt-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
 	# boot a Vagrant env based on that box, run E2E tests
@@ -42,7 +44,7 @@ upload-libvirt-%:
 
 	# if box archive is missing, package it
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/libvirt/create-vagrant-libvirt-box.sh \
+	  utils/vagrant/libvirt/create-vagrant-libvirt-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
 	#  upload box to vagrant cloud, using trickle to limit bandwith
@@ -53,7 +55,7 @@ upload-libvirt-%:
 test-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 	test -f virtualbox-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh \
+	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	utils/vagrant/tests/vagrant-test virtualbox $* \
 	  virtualbox-debian-$*-official-$(VERSION).box
@@ -62,7 +64,7 @@ upload-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 
 	test -f libvirt-debian-$*-official-$(VERSION).box || \
-	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box.sh \
+	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	trickle -u 128 vagrant cloud publish --force debian-sandbox/$(word 1, $(subst -, ,$*))64 \
 		$$(date '+%Y%m%d')-$${CI_PIPELINE_IID} virtualbox \

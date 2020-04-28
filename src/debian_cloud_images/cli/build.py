@@ -43,7 +43,7 @@ class Release:
 
     def get_default_grub_class(self, arch, vendor):
         if arch == 'amd64':
-            if vendor == 'vagrant':
+            if vendor == 'vagrant' or vendor == 'vagrantcontrib':
                 return 'GRUB_PC'
             else:
                 return 'GRUB_CLOUD_AMD64'
@@ -172,6 +172,11 @@ VendorEnum = enum.Enum(  # type:ignore
         'vagrant': {
             'fai_size': '20G',
             'fai_classes': ('VAGRANT', ),
+            'use_linux_image_cloud': False,
+        },
+        'vagrantcontrib': {
+            'fai_size': '20G',
+            'fai_classes': ('VAGRANT', 'VAGRANTCONTRIB'),
             'use_linux_image_cloud': False,
         },
     },

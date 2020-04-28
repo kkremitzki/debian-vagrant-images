@@ -154,6 +154,27 @@ vagrant bullseye amd64 build:
    CLOUD_RELEASE: bullseye
    CLOUD_VENDOR: vagrant
 
+vagrantcontrib stretch amd64 build:
+  extends: .vagrant build
+  variables:
+    CLOUD_ARCH: amd64
+    CLOUD_RELEASE: stretch
+    CLOUD_VENDOR: vagrantcontrib
+
+vagrantcontrib buster amd64 build:
+ extends: .vagrant build
+ variables:
+   CLOUD_ARCH: amd64
+   CLOUD_RELEASE: buster
+   CLOUD_VENDOR: vagrantcontrib
+
+vagrantcontrib bullseye amd64 build:
+ extends: .vagrant build
+ variables:
+   CLOUD_ARCH: amd64
+   CLOUD_RELEASE: bullseye
+   CLOUD_VENDOR: vagrantcontrib
+
 .virtualbox box:
   rules:
   - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
@@ -168,10 +189,10 @@ vagrant bullseye amd64 build:
       libxml-writer-perl libguestfs-perl uuid-runtime linux-image-amd64
     - 'xz -d *.raw.xz'
     - >
-      echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - >
-      utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
@@ -193,10 +214,10 @@ vagrant bullseye amd64 build:
   script:
     - 'xz -d *.raw.xz'
     - >
-      echo utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - > 
-      utils/vagrant/libvirt/create-vagrant-libvirt-box.sh 
+      utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt
