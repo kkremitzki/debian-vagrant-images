@@ -183,7 +183,7 @@ vagrantcontrib bullseye build:
     - >
       apt-get install --no-install-recommends -y
       libxml-writer-perl libguestfs-perl uuid-runtime linux-image-amd64
-    - 'xz -vd debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-*.raw.xz'
+    - 'xz -vd *.raw.xz'
     - >
       echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
@@ -210,7 +210,7 @@ vagrantcontrib bullseye build:
   stage: vagrant package
   image: debian:buster
   script:
-    - 'xz -vd debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-*.raw.xz'
+    - 'xz -vd *.raw.xz'
     - >
       echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
