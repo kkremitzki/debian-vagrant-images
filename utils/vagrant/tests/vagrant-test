@@ -39,6 +39,7 @@ EOF
   vagrant ssh -- sudo true
   vagrant ssh -- cat /etc/debian_version
   vagrant ssh -c "sh /vagrant/package-report"
+  vagrant ssh -c "sudo apt-get update"
   vagrant ssh -c "sudo apt-get --quiet --yes install figlet \
      && ( lsb_release --release --codename ) | figlet"
 )
