@@ -106,6 +106,8 @@ before_script:
       --build-type official
       ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
     - 'xz -vk5T0 *.raw'
+  variables:
+    CLOUD_ARCH: amd64
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}
     expire_in: 2 days
@@ -133,45 +135,39 @@ before_script:
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
 
-vagrant stretch amd64 build:
+vagrant stretch build:
   extends: .vagrant build
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: stretch
     CLOUD_VENDOR: vagrant
 
-vagrant buster amd64 build:
+vagrant buster build:
  extends: .vagrant build
  variables:
-   CLOUD_ARCH: amd64
    CLOUD_RELEASE: buster
    CLOUD_VENDOR: vagrant
 
-vagrant bullseye amd64 build:
+vagrant bullseye build:
  extends: .vagrant build
  variables:
-   CLOUD_ARCH: amd64
    CLOUD_RELEASE: bullseye
    CLOUD_VENDOR: vagrant
 
-vagrantcontrib stretch amd64 build:
+vagrantcontrib stretch build:
   extends: .vagrant build
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: stretch
     CLOUD_VENDOR: vagrantcontrib
 
-vagrantcontrib buster amd64 build:
+vagrantcontrib buster build:
  extends: .vagrant build
  variables:
-   CLOUD_ARCH: amd64
    CLOUD_RELEASE: buster
    CLOUD_VENDOR: vagrantcontrib
 
-vagrantcontrib bullseye amd64 build:
+vagrantcontrib bullseye build:
  extends: .vagrant build
  variables:
-   CLOUD_ARCH: amd64
    CLOUD_RELEASE: bullseye
    CLOUD_VENDOR: vagrantcontrib
 
@@ -187,13 +183,15 @@ vagrantcontrib bullseye amd64 build:
     - >
       apt-get install --no-install-recommends -y
       libxml-writer-perl libguestfs-perl uuid-runtime linux-image-amd64
-    - 'xz -d *.raw.xz'
+    - 'xz -vd *.raw.xz'
     - >
       echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - >
       utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
+  variables:
+    CLOUD_ARCH: amd64
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
     expire_in: 2 days
@@ -212,13 +210,15 @@ vagrantcontrib bullseye amd64 build:
   stage: vagrant package
   image: debian:buster
   script:
-    - 'xz -d *.raw.xz'
+    - 'xz -vd *.raw.xz'
     - >
       echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
     - > 
       utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
+  variables:
+    CLOUD_ARCH: amd64
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt
     expire_in: 2 days
@@ -228,44 +228,56 @@ vagrantcontrib bullseye amd64 build:
       - '*.build.json'
       - '*.info'
 
-vagrant stretch amd64 virtualbox box:
+vagrant stretch virtualbox box:
   extends: .virtualbox box
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: stretch
     CLOUD_VENDOR: vagrant
 
-vagrant stretch amd64 libvirt box:
+vagrantcontrib stretch virtualbox box:
+  extends: .virtualbox box
+  variables:
+    CLOUD_RELEASE: stretch
+    CLOUD_VENDOR: vagrantcontrib
+
+vagrant stretch libvirt box:
   extends: .libvirt box
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: stretch
     CLOUD_VENDOR: vagrant
 
-vagrant buster amd64 virtualbox box:
+vagrant buster virtualbox box:
   extends: .virtualbox box
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: buster
     CLOUD_VENDOR: vagrant
 
-vagrant buster amd64 libvirt box:
+vagrantcontrib buster virtualbox box:
+  extends: .virtualbox box
+  variables:
+    CLOUD_RELEASE: buster
+    CLOUD_VENDOR: vagrantcontrib
+
+vagrant buster libvirt box:
   extends: .libvirt box
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: buster
     CLOUD_VENDOR: vagrant
 
-vagrant bullseye amd64 virtualbox box:
+vagrant bullseye virtualbox box:
   extends: .virtualbox box
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: bullseye
     CLOUD_VENDOR: vagrant
 
-vagrant bullseye amd64 libvirt box:
+vagrantcontrib bullseye virtualbox box:
+  extends: .virtualbox box
+  variables:
+    CLOUD_RELEASE: bullseye
+    CLOUD_VENDOR: vagrantcontrib
+
+vagrant bullseye libvirt box:
   extends: .libvirt box
   variables:
-    CLOUD_ARCH: amd64
     CLOUD_RELEASE: bullseye
     CLOUD_VENDOR: vagrant
