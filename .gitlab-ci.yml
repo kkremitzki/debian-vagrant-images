@@ -106,6 +106,8 @@ before_script:
       --build-type official
       ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
     - 'xz -vk5T0 *.raw'
+  variables:
+    CLOUD_ARCH: amd64
   artifacts:
     name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}
     expire_in: 2 days
