@@ -217,7 +217,6 @@ vagrantcontrib bullseye build:
     - > 
       utils/vagrant/libvirt/create-vagrant-libvirt-box 
       debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
-    - 'split --bytes 199M  --numeric-suffixes $(ls *.box) $(ls *.box).split.'
   variables:
     CLOUD_ARCH: amd64
   artifacts:
