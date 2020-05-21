@@ -1,0 +1,71 @@
+#!/usr/bin/python3
+import subprocess
+import sys
+from os import path
+
+VERSIONS = {
+    'buster': '10',
+    'bullseye': 'testing',
+}
+CLOUD_NAMESPACE = 'debian-sandbox'
+
+
+def main():
+    if len(sys.argv) != 2 or not path.exists(sys.argv[1]):
+        print(f"could not read box file", file=sys.stderr)
+        sys.exit(1)
+
+    rawdisk = sys.argv[1]
+    infos = parsedisk(rawdisk)
+    version = buildversion(infos)
+    upload_command = build_upload_command(rawdisk, infos, version)
+    subprocess.check_call(upload_command, stdout=sys.stdout, stderr=sys.stderr)
+
+
+def buildversion(infos):
+    if not infos['dist'] in VERSIONS:
+        raise ValueError(f"unknow distribution: {infos['dist']}")
+
+    version = VERSIONS[infos['dist']]
+    version += '.'
+    if version == 'testing.':
+        version = ''
+    version += infos['builddate']
+    version += '.'
+    version += infos['buildincrement']
+    return version
+
+
+def parsedisk(boxname):
+    filename = path.splitext(path.basename(boxname))[0]
+    infos = filename.split('-')
+    if len(infos) != 8:
+        print(f"unable to parse boxname {boxname}", file=sys.stderr)
+        sys.exit(1)
+
+    info = {
+        'hypervisor': infos[0],
+        'os': infos[1],
+        'dist': infos[2],
+        'vendor': infos[3],
+        'arch': infos[4],
+        'buildtype': infos[5],
+        'builddate': infos[6],
+        'buildincrement': infos[7],
+    }
+
+    return info
+
+
+def build_upload_command(rawdisk, infos, version):
+    # --force disables interactive confirmation prompt
+    command = 'vagrant cloud publish --force --release'.split()
+    command.append(CLOUD_NAMESPACE + '/' + infos['dist'] + '64')
+    command.append(version)
+    command.append(infos['hypervisor'])
+    command.append(rawdisk)
+    return command
+
+
+if __name__ == '__main__':
+    main()
