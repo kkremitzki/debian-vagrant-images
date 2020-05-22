@@ -135,35 +135,11 @@ before_script:
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
 
-vagrant stretch build:
-  extends: .vagrant build
-  variables:
-    CLOUD_RELEASE: stretch
-    CLOUD_VENDOR: vagrant
-
-vagrant buster build:
- extends: .vagrant build
- variables:
-   CLOUD_RELEASE: buster
-   CLOUD_VENDOR: vagrant
-
 vagrant bullseye build:
  extends: .vagrant build
  variables:
    CLOUD_RELEASE: bullseye
    CLOUD_VENDOR: vagrant
-
-vagrantcontrib stretch build:
-  extends: .vagrant build
-  variables:
-    CLOUD_RELEASE: stretch
-    CLOUD_VENDOR: vagrantcontrib
-
-vagrantcontrib buster build:
- extends: .vagrant build
- variables:
-   CLOUD_RELEASE: buster
-   CLOUD_VENDOR: vagrantcontrib
 
 vagrantcontrib bullseye build:
  extends: .vagrant build
@@ -227,42 +203,6 @@ vagrantcontrib bullseye build:
       #- '*.box'
       - '*.build.json'
       - '*.info'
-
-vagrant stretch virtualbox box:
-  extends: .virtualbox box
-  variables:
-    CLOUD_RELEASE: stretch
-    CLOUD_VENDOR: vagrant
-
-vagrantcontrib stretch virtualbox box:
-  extends: .virtualbox box
-  variables:
-    CLOUD_RELEASE: stretch
-    CLOUD_VENDOR: vagrantcontrib
-
-vagrant stretch libvirt box:
-  extends: .libvirt box
-  variables:
-    CLOUD_RELEASE: stretch
-    CLOUD_VENDOR: vagrant
-
-vagrant buster virtualbox box:
-  extends: .virtualbox box
-  variables:
-    CLOUD_RELEASE: buster
-    CLOUD_VENDOR: vagrant
-
-vagrantcontrib buster virtualbox box:
-  extends: .virtualbox box
-  variables:
-    CLOUD_RELEASE: buster
-    CLOUD_VENDOR: vagrantcontrib
-
-vagrant buster libvirt box:
-  extends: .libvirt box
-  variables:
-    CLOUD_RELEASE: buster
-    CLOUD_VENDOR: vagrant
 
 vagrant bullseye virtualbox box:
   extends: .virtualbox box
