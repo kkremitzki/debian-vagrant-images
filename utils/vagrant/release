@@ -47,7 +47,7 @@ def parsedisk(boxname):
         'hypervisor': infos[0],
         'os': infos[1],
         'dist': infos[2],
-        'vendor': infos[3],
+        'vendor': infos[3], # vagrant or vagrant-contrib
         'arch': infos[4],
         'buildtype': infos[5],
         'builddate': infos[6],
@@ -60,7 +60,14 @@ def parsedisk(boxname):
 def build_upload_command(rawdisk, infos, version):
     # --force disables interactive confirmation prompt
     command = 'vagrant cloud publish --force --release'.split()
-    command.append(CLOUD_NAMESPACE + '/' + infos['dist'] + '64')
+    box_name = infos['dist']
+    if VERSIONS[box_name] == 'testing':
+        box_name = 'testing'
+    box_name += '64'
+
+    if infos['vendor'] == 'vagrantcontrib':
+        box_name = 'contrib-' + box_name
+    command.append(CLOUD_NAMESPACE + '/' + box_name)
     command.append(version)
     command.append(infos['hypervisor'])
     command.append(rawdisk)
