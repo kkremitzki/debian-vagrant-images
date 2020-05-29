@@ -47,7 +47,7 @@ def parsedisk(boxname):
         'hypervisor': infos[0],
         'os': infos[1],
         'dist': infos[2],
-        'vendor': infos[3], # vagrant or vagrant-contrib
+        'vendor': infos[3],  # vagrant or vagrant-contrib
         'arch': infos[4],
         'buildtype': infos[5],
         'builddate': infos[6],
