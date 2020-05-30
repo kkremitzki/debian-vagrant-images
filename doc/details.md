@@ -69,6 +69,7 @@ Release specific classes:
 * BUSTER
 * SID
 * STRETCH
+* TESTING
 
 
 Only for internal use:
@@ -77,3 +78,4 @@ Only for internal use:
 * BUSTER_BUILD
 * SID_BUILD
 * STRETCH_BUILD
+* TESTING_BUILD
