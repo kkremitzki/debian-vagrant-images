@@ -122,15 +122,16 @@ before_script:
 # Builds for developer uploads pushes
 #
 # Builds are run if
-# - it is requested by setting $BUILD_VAGRANT
+# - this is a merge request for master
+# - BUILD_VAGRANT is set
 # - the manual jobs are started.
 ####
 
 .vagrant build:
   extends: .build
   rules:
-  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
-    when: on_success
+  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  - if: '$BUILD_VAGRANT'
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
 
@@ -149,8 +150,8 @@ vagrantcontrib testing build:
 .virtualbox box:
   stage: vagrant package
   rules:
-  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
-    when: on_success
+  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  - if: '$BUILD_VAGRANT'
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
   image: debian:buster
@@ -179,8 +180,8 @@ vagrantcontrib testing build:
 .libvirt box:
   stage: vagrant package
   rules:
-  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
-    when: on_success
+  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  - if: '$BUILD_VAGRANT'
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
   image: debian:buster
@@ -218,5 +219,5 @@ vagrantcontrib testing virtualbox box:
 vagrant testing libvirt box:
   extends: .libvirt box
   variables:
-    CLOUD_RELEASE: bullseye
+    CLOUD_RELEASE: testing
     CLOUD_VENDOR: vagrant
