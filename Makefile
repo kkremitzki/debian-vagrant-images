@@ -10,8 +10,8 @@ VERSION := $(shell date '+%Y%m%d')-$(CI_PIPELINE_IID)
 help:
 	@echo "To run this makefile, run:"
 	@echo "   make <DIST>-<CLOUD>-<ARCH>"
-	@echo "  WHERE <DIST> is bullseye, buster, stretch or sid"
-	@echo "    And <CLOUD> is azure, ec2, gce, generic, genericcloud, nocloud, vagrant"
+	@echo "  WHERE <DIST> is bullseye, buster, stretch, sid or testing"
+	@echo "    And <CLOUD> is azure, ec2, gce, generic, genericcloud, nocloud, vagrant, vagrantcontrib"
 	@echo "    And <ARCH> is amd64, arm64, ppc64el"
 	@echo "Set DESTDIR= to write images to given directory."
 
