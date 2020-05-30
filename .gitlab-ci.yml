@@ -3,7 +3,6 @@ stages:
   # - source test
   - build
   - vagrant package
-  - vendor upload
   - upload
 
 variables:
@@ -123,37 +122,38 @@ before_script:
 # Builds for developer uploads pushes
 #
 # Builds are run if
-# - it is requested by setting $BUILD_AZURE, $BUILD_EC2, $BUILD_GCE, $BUILD_GENERIC or $BUILD_NOCLOUD or
+# - this is a merge request for master
+# - BUILD_VAGRANT is set
 # - the manual jobs are started.
 ####
 
 .vagrant build:
   extends: .build
   rules:
-  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
-    when: on_success
+  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  - if: '$BUILD_VAGRANT'
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
 
-vagrant bullseye build:
+vagrant testing build:
  extends: .vagrant build
  variables:
-   CLOUD_RELEASE: bullseye
+   CLOUD_RELEASE: testing
    CLOUD_VENDOR: vagrant
 
-vagrantcontrib bullseye build:
+vagrantcontrib testing build:
  extends: .vagrant build
  variables:
-   CLOUD_RELEASE: bullseye
+   CLOUD_RELEASE: testing
    CLOUD_VENDOR: vagrantcontrib
 
 .virtualbox box:
+  stage: vagrant package
   rules:
-  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
-    when: on_success
+  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  - if: '$BUILD_VAGRANT'
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
-  stage: vagrant package
   image: debian:buster
   script:
     - >
@@ -178,12 +178,12 @@ vagrantcontrib bullseye build:
       - '*.info'
 
 .libvirt box:
+  stage: vagrant package
   rules:
-  - if: '$CI_MERGE_REQUEST_ID == null && $BUILD_VAGRANT'
-    when: on_success
+  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  - if: '$BUILD_VAGRANT'
   - if: '$CI_MERGE_REQUEST_ID == null'
     when: manual
-  stage: vagrant package
   image: debian:buster
   script:
     - 'xz -vd debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-*.raw.xz'
@@ -204,20 +204,20 @@ vagrantcontrib bullseye build:
       - '*.build.json'
       - '*.info'
 
-vagrant bullseye virtualbox box:
+vagrant testing virtualbox box:
   extends: .virtualbox box
   variables:
-    CLOUD_RELEASE: bullseye
+    CLOUD_RELEASE: testing
     CLOUD_VENDOR: vagrant
 
-vagrantcontrib bullseye virtualbox box:
+vagrantcontrib testing virtualbox box:
   extends: .virtualbox box
   variables:
-    CLOUD_RELEASE: bullseye
+    CLOUD_RELEASE: testing
     CLOUD_VENDOR: vagrantcontrib
 
-vagrant bullseye libvirt box:
+vagrant testing libvirt box:
   extends: .libvirt box
   variables:
-    CLOUD_RELEASE: bullseye
+    CLOUD_RELEASE: testing
     CLOUD_VENDOR: vagrant
