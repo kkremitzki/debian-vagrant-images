@@ -1,24 +1,37 @@
 #!/usr/bin/python3
 import subprocess
 import sys
-from os import path
+from os import environ, path
 
 VERSIONS = {
     'buster': '10',
     'bullseye': 'testing',
+    'testing': 'testing'  # allow access to testing via nickname and realname
 }
-CLOUD_NAMESPACE = 'debian-sandbox'
 
 
 def main():
-    if len(sys.argv) != 2 or not path.exists(sys.argv[1]):
+    argcount = len(sys.argv)
+    if argcount < 2 or argcount > 5 or not path.exists(sys.argv[1]):
         print(f"could not read box file", file=sys.stderr)
         sys.exit(1)
 
     rawdisk = sys.argv[1]
+    namespace = 'debian-sandbox'
+    if argcount >= 3:
+        namespace = sys.argv[2]
+    do_release = False
+    if argcount == 4 and sys.argv[3] == 'do-release':
+        do_release = True
+
     infos = parsedisk(rawdisk)
     version = buildversion(infos)
-    upload_command = build_upload_command(rawdisk, infos, version)
+    upload_command = build_upload_command(rawdisk, infos, version,
+                                          namespace, do_release)
+    print(' '.join(upload_command))
+    if 'VAGRANT_CLOUD_TOKEN' not in environ.keys():
+        print('VAGRANT_CLOUD_TOKEN not set in environment, exiting')
+        sys.exit(1)
     subprocess.check_call(upload_command, stdout=sys.stdout, stderr=sys.stderr)
 
 
@@ -57,9 +70,12 @@ def parsedisk(boxname):
     return info
 
 
-def build_upload_command(rawdisk, infos, version):
+def build_upload_command(rawdisk, infos, version, namespace, do_release):
     # --force disables interactive confirmation prompt
-    command = 'vagrant cloud publish --force --release'.split()
+    command = 'vagrant cloud publish --force'.split()
+    if do_release:
+        command.append('--release')
+
     box_name = infos['dist']
     if VERSIONS[box_name] == 'testing':
         box_name = 'testing'
@@ -67,7 +83,7 @@ def build_upload_command(rawdisk, infos, version):
 
     if infos['vendor'] == 'vagrantcontrib':
         box_name = 'contrib-' + box_name
-    command.append(CLOUD_NAMESPACE + '/' + box_name)
+    command.append(namespace + '/' + box_name)
     command.append(version)
     command.append(infos['hypervisor'])
     command.append(rawdisk)
