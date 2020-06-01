@@ -7,6 +7,9 @@ export CI_PIPELINE_IID = 1
 # this is how ./bin/debian-cloud-images build defines a version
 VERSION := $(shell date '+%Y%m%d')-$(CI_PIPELINE_IID)
 
+NAMESPACE = debian-sandbox
+IS_RELEASE = do-release
+
 help:
 	@echo "To run this makefile, run:"
 	@echo "   make <DIST>-<CLOUD>-<ARCH>"
@@ -49,7 +52,8 @@ upload-libvirt-%:
 
 	#  upload box to vagrant cloud, using trickle to limit bandwith
 	trickle -u 128  utils/vagrant/release \
-		libvirt-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box
+		libvirt-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box \
+       $(NAMESPACE) $(IS_RELEASE)
 
 test-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
@@ -65,7 +69,8 @@ upload-virtualbox-%:
 	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 	trickle -u 128 utils/vagrant/release \
-		virtualbox-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box
+	  virtualbox-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box \
+	  $(NAMESPACE) $(IS_RELEASE)
 
 clean:
 	rm -rf debian-*.* *.box
