@@ -1,7 +1,7 @@
 # FAI vagrant image builder
 
 This repository aims to build the Debian Vagrant base boxes available at 
-https://app.vagrantup.com/debian  
+https://app.vagrantup.com/debian
 See that URL for the end user documentation.
 This repository is based on a fork of https://salsa.debian.org/cloud-team/debian-cloud-images and tries to minimize changes to vagrant specific changes when possible.
 
@@ -51,7 +51,18 @@ Then if you call
 ```
 make test-virtualbox-stretch-vagrant-amd64
 ```
-a box called virtualbox-debian-stretch-vagrant-amd64-official-20200421-1.box will be created in the current directory, and a test environment based on this box will run the e2e tests.
+a box called virtualbox-debian-stretch-vagrant-amd64-official-20200421-1.box
+will be created in the current directory, and a test environment based on this box will run the e2e tests.
 
+## Uploading boxes to Vagrant Cloud
+To upload the boxes via make, you will need:
+- the trickle package, which is a bandwidth usage limiter
+- the VAGRANT_CLOUD_TOKEN set as an environment variable
 
+Then if you call
+```
+   #  make NAMESPACE=debian IS_RELEASE=norelease test-virtualbox-stretch-vagrant-amd64
+```
+The box virtualbox-debian-stretch-vagrant-amd64-official-20200421-1.box will be uploaded to 
+'https://app.vagrantup.com/debian/', and you will have to release it manually.
 
