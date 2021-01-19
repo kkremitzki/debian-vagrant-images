@@ -1,5 +1,4 @@
 [Unit]
-Before=ssh.service
 Description=Generate sshd host keys on first boot of a vagrant environment
 
 [Service]
