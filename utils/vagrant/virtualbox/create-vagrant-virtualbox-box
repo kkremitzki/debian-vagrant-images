@@ -86,7 +86,7 @@ def create_tarball(tarfiles, archivename, builddir):
 def parsedisk(diskname):
   filename = path.splitext(path.basename(diskname))[0]
   infos = filename.split('-')
-  if len(infos) is not 7:
+  if len(infos) != 7:
     print(f"unable to parse diskname {diskname}", file=sys.stderr)
     sys.exit(1)
 
