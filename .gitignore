@@ -12,3 +12,4 @@ __pycache__/
 /image-*.build.junit.xml
 /*.box
 /debian-*
+utils/vagrant/token.gpg
