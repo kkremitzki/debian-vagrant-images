@@ -23,8 +23,8 @@ def main():
 
     tarfiles.append(create_metadata(builddir))
     diskinfos = parsedisk(rawdisk)
-    tarfiles.append(create_vagrantfile(scriptdir, builddir, diskinfos['vendor']))
-    #TODO: catch return code of create_vmdk and create_ovf subprocess commands
+    tarfiles.append(create_vagrantfile(scriptdir, builddir, diskinfos))
+    # TODO: catch return code of create_vmdk and create_ovf subprocess commands
     vmdk = create_vmdk(rawdisk, builddir)
     tarfiles.append(vmdk)
     tarfiles.append(create_ovf(startdir, scriptdir, vmdk, builddir))
@@ -51,12 +51,13 @@ def create_metadata(builddir):
     return mdata
 
 
-def create_vagrantfile(scriptdir, builddir, vendor):
-    vfile = 'Vagrantfile'
-    if vendor == 'vagrantcontrib':
-      vfile = 'Vagrantfile-contrib'
-    copy(path.join(scriptdir, vfile + '.in'), path.join(builddir, vfile))
-    return vfile
+def create_vagrantfile(scriptdir, builddir, diskinfos):
+    vfile = 'Vagrantfile-vboxsf'
+    if (diskinfos['release'] in ['jessie', 'stretch', 'buster']
+            and diskinfos['vendor'] != 'vagrantcontrib'):
+        vfile = 'Vagrantfile-rsync'
+    copy(path.join(scriptdir, vfile + '.in'), path.join(builddir, 'Vagrantfile'))
+    return 'Vagrantfile'
 
 
 def create_vmdk(rawdisk, builddir):
@@ -84,23 +85,23 @@ def create_tarball(tarfiles, archivename, builddir):
 
 
 def parsedisk(diskname):
-  filename = path.splitext(path.basename(diskname))[0]
-  infos = filename.split('-')
-  if len(infos) != 7:
-    print(f"unable to parse diskname {diskname}", file=sys.stderr)
-    sys.exit(1)
+    filename = path.splitext(path.basename(diskname))[0]
+    infos = filename.split('-')
+    if len(infos) != 7:
+        print(f"unable to parse diskname {diskname}", file=sys.stderr)
+        sys.exit(1)
 
-  info = {
-    'os': infos[0],
-    'dist': infos[1],
-    'vendor': infos[2],
-    'arch': infos[3],
-    'buildtype': infos[4],
-    'builddate': infos[5],
-    'buildincrement': infos[6],
-  }
+    info = {
+        'os': infos[0],
+        'release': infos[1],
+        'vendor': infos[2],
+        'arch': infos[3],
+        'buildtype': infos[4],
+        'builddate': infos[5],
+        'buildincrement': infos[6],
+    }
 
-  return info
+    return info
 
 
 if __name__ == '__main__':
