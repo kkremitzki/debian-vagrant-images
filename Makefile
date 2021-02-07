@@ -51,7 +51,7 @@ upload-libvirt-%:
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
 	#  upload box to vagrant cloud, using trickle to limit bandwith
-	trickle -u 128  utils/vagrant/release \
+	trickle -su 128  utils/vagrant/release \
 		libvirt-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box \
        $(NAMESPACE) $(IS_RELEASE)
 
@@ -68,7 +68,7 @@ upload-virtualbox-%:
 	test -f virtualbox-debian-$*-official-$(VERSION).box || \
 	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
-	trickle -u 128 utils/vagrant/release \
+	trickle -su 128 utils/vagrant/release \
 	  virtualbox-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box \
 	  $(NAMESPACE) $(IS_RELEASE)
 
