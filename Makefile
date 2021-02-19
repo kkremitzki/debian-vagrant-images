@@ -25,7 +25,13 @@ help:
 	  --build-id $(CLOUD_IMAGE_BUILD_ID) \
 	  --build-type official
 
-test-libvirt-%:
+install-build-deps:
+	sudo apt install -y --no-install-recommends ca-certificates debsums dosfstools \
+    fai-server fai-setup-storage make python3 python3-libcloud python3-marshmallow \
+    python3-pytest python3-yaml qemu-utils udev \
+    libguestfs-perl libxml-writer-perl uuid-runtime
+
+build-libvirt-%:
 	# if raw disk image is missing, build it
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 
@@ -34,6 +40,7 @@ test-libvirt-%:
 	  utils/vagrant/libvirt/create-vagrant-libvirt-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
 
+test-libvirt-%:
 	# boot a Vagrant env based on that box, run E2E tests
 	utils/vagrant/tests/vagrant-test libvirt $* \
 	  libvirt-debian-$*-official-$(VERSION).box
@@ -55,11 +62,13 @@ upload-libvirt-%:
 		libvirt-debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.box \
        $(NAMESPACE) $(IS_RELEASE)
 
-test-virtualbox-%:
+build-virtualbox-%:
 	test -f debian-$*-official-$(VERSION).raw || $(MAKE) $*
 	test -f virtualbox-debian-$*-official-$(VERSION).box || \
 	  utils/vagrant/virtualbox/create-vagrant-virtualbox-box \
 	  debian-$*-official-$$(date '+%Y%m%d')-$${CI_PIPELINE_IID}.raw
+
+test-virtualbox-%:
 	utils/vagrant/tests/vagrant-test virtualbox $* \
 	  virtualbox-debian-$*-official-$(VERSION).box
 

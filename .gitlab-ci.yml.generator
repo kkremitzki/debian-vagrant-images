@@ -1,0 +1,127 @@
+#!/usr/bin/ruby
+
+f = File::dirname(__FILE__)+'/.gitlab-ci.yml'
+fd = File::new(f, 'w')
+fd.puts <<-EOF
+---
+stages:
+  - build
+  - test
+  - upload
+
+.build:
+  stage: build
+  tags:
+   - grid5000-shell
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --build
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - '*.build.json'
+      - '*.info'
+    reports:
+      junit: '*.build.junit.xml'
+
+.test virtualbox:
+  stage: test
+  tags:
+   - grid5000-shell
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --test-virtualbox
+
+.test libvirt:
+  stage: test
+  tags:
+   - grid5000-shell
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --test-libvirt
+
+.upload virtualbox:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-virtualbox
+
+
+.upload libvirt:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-libvirt
+
+.upload-sandbox virtualbox:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-virtualbox
+
+
+.upload-sandbox libvirt:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
+EOF
+
+['stretch', 'buster', 'bullseye', 'testing'].each do |dist|
+  ['vagrant', 'vagrantcontrib'].each do |type|
+    next if ['testing', 'bullseye'].include?(dist) and type == 'vagrantcontrib' # not needed anymore because vboxsf is included in the vanilla kernel
+    fd.puts <<-EOF
+#{dist}-#{type}-amd64 build:
+  extends: .build
+    EOF
+    if ['jessie','stretch'].include?(dist) # for jessie and stretch, do not run pipeline by default
+      fd.puts <<-EOF
+  when: manual
+      EOF
+    end
+    fd.puts <<-EOF
+
+#{dist}-#{type}-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["#{dist}-#{type}-amd64 build"]
+
+#{dist}-#{type}-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["#{dist}-#{type}-amd64 test-libvirt"]
+  when: manual
+
+#{dist}-#{type}-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["#{dist}-#{type}-amd64 test-libvirt"]
+  when: manual
+
+#{dist}-#{type}-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["#{dist}-#{type}-amd64 build"]
+
+#{dist}-#{type}-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["#{dist}-#{type}-amd64 test-virtualbox"]
+  when: manual
+
+#{dist}-#{type}-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["#{dist}-#{type}-amd64 test-virtualbox"]
+  when: manual
+EOF
+  end
+end
+fd.close

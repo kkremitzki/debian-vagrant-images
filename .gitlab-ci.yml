@@ -1,223 +1,257 @@
 ---
 stages:
-  # - source test
   - build
-  - vagrant package
+  - test
   - upload
-
-variables:
-  CLOUD_IMAGE_BUILD_ID: ${CI_PROJECT_NAMESPACE}-${CI_COMMIT_REF_SLUG}
-  GIT_DEPTH: "1"
-
-before_script:
-  - apt-get update
-  - >
-    apt-get install --no-install-recommends -y python3-libcloud 
-    python3-marshmallow python3-yaml qemu-utils sudo xz-utils
-  - |
-    if [ "$CI_DISPOSABLE_ENVIRONMENT" ]; then
-      # Workaround unsupported SEEK_HOLE in overlayfs (Docker default)
-      mount -t tmpfs none /tmp
-    fi
-
-# test flake8:
-#   stage: source test
-#   image: debian:buster
-#   script:
-#     - >
-#       apt-get install --no-install-recommends -y
-#       python3-flake8
-#     - python3 -m flake8
-
-# test mypy:
-#   stage: source test
-#   image: debian:bullseye
-#   script:
-#     - >
-#       apt-get install --no-install-recommends -y
-#       mypy
-#     - mypy src
-#   allow_failure: true
-
-# test package:
-#   stage: source test
-#   image: debian:buster
-#   script:
-#     - apt-get build-dep -y ./
-#     - >
-#       apt-get install --no-install-recommends -y
-#       lintian
-#     - DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc
-#     - lintian ../*.changes
-
-# test pytest:
-#   stage: source test
-#   image: debian:buster
-#   script:
-#     - >
-#       apt-get install --no-install-recommends -y
-#       python3-pytest python3-pytest-cov
-#     - >
-#       PYTHONPATH=src
-#       py.test-3
-#       -vrxXs
-#       --color=yes
-#       --cov=src --cov-report=term --cov-report=html:coverage
-#       --junit-xml=junit.xml
-#       tests
-#   artifacts:
-#     paths:
-#       - coverage/
-#     reports:
-#       junit: junit.xml
-
-# test pytest latest:
-#   stage: source test
-#   image: python:slim
-#   before_script:
-#     - pip install -e .
-#   script:
-#     - python3 ./setup.py pytest
 
 .build:
   stage: build
-  image: debian:buster
+  tags:
+   - grid5000-shell
   script:
-    - >
-      apt-get install --no-install-recommends -y
-      binfmt-support ca-certificates debsums dosfstools fai-server
-      fai-setup-storage python3-pytest qemu-user-static sudo
-      udev
-    - |
-      if [ "$CI_DISPOSABLE_ENVIRONMENT" ]; then
-        # Some of our build environments run with SELinux enabled, make sure it is detected by all the tools
-        if [ -d /sys/fs/selinux ]; then mount -t selinuxfs none /sys/fs/selinux; mkdir -p /etc/selinux; touch /etc/selinux/config; fi
-      fi
-    - >
-      echo $CI_PIPELINE_IID
-      echo debian-cloud-images build
-      --build-id ${CLOUD_IMAGE_BUILD_ID}
-      --build-type official
-      ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
-    - >
-      ./bin/debian-cloud-images build
-      --build-id ${CLOUD_IMAGE_BUILD_ID}
-      --build-type official
-      ${CLOUD_RELEASE} ${CLOUD_VENDOR} ${CLOUD_ARCH}
-    - 'xz -vk5T0 *.raw'
-  variables:
-    CLOUD_ARCH: amd64
+   - /srv/ci-runner-scripts/bin/debvagrant --build
   artifacts:
-    name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}
     expire_in: 2 days
     paths:
-      - '*.raw.xz'
       - '*.build.json'
       - '*.info'
     reports:
       junit: '*.build.junit.xml'
-  allow_failure: true
 
-####
-# Builds for developer uploads pushes
-#
-# Builds are run if
-# - this is a merge request for master
-# - BUILD_VAGRANT is set
-# - the manual jobs are started.
-####
+.test virtualbox:
+  stage: test
+  tags:
+   - grid5000-shell
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --test-virtualbox
 
-.vagrant build:
+.test libvirt:
+  stage: test
+  tags:
+   - grid5000-shell
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --test-libvirt
+
+.upload virtualbox:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-virtualbox
+
+
+.upload libvirt:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-libvirt
+
+.upload-sandbox virtualbox:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-virtualbox
+
+
+.upload-sandbox libvirt:
+  stage: upload
+  tags:
+  - grid5000-shell
+  only:
+    refs:
+      - g5kci
+  script:
+  - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
+stretch-vagrant-amd64 build:
   extends: .build
-  rules:
-  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
-  - if: '$BUILD_VAGRANT'
-  - if: '$CI_MERGE_REQUEST_ID == null'
-    when: manual
+  when: manual
 
-vagrant testing build:
- extends: .vagrant build
- variables:
-   CLOUD_RELEASE: testing
-   CLOUD_VENDOR: vagrant
+stretch-vagrant-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["stretch-vagrant-amd64 build"]
 
-vagrantcontrib testing build:
- extends: .vagrant build
- variables:
-   CLOUD_RELEASE: testing
-   CLOUD_VENDOR: vagrantcontrib
+stretch-vagrant-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["stretch-vagrant-amd64 test-libvirt"]
+  when: manual
 
-.virtualbox box:
-  stage: vagrant package
-  rules:
-  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
-  - if: '$BUILD_VAGRANT'
-  - if: '$CI_MERGE_REQUEST_ID == null'
-    when: manual
-  image: debian:buster
-  script:
-    - >
-      apt-get install --no-install-recommends -y
-      libxml-writer-perl libguestfs-perl uuid-runtime linux-image-amd64
-    - 'xz -vd debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-*.raw.xz'
-    - >
-      echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
-    - >
-      utils/vagrant/libvirt/create-vagrant-libvirt-box 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
-  variables:
-    CLOUD_ARCH: amd64
-  artifacts:
-    name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-virtualbox
-    expire_in: 2 days
-    paths:
-      # this fails with Uploading artifacts to coordinator... too large archive (HTTP 413)
-      #- '*.box'
-      - '*.build.json'
-      - '*.info'
+stretch-vagrant-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["stretch-vagrant-amd64 test-libvirt"]
+  when: manual
 
-.libvirt box:
-  stage: vagrant package
-  rules:
-  - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
-  - if: '$BUILD_VAGRANT'
-  - if: '$CI_MERGE_REQUEST_ID == null'
-    when: manual
-  image: debian:buster
-  script:
-    - 'xz -vd debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-*.raw.xz'
-    - >
-      echo utils/vagrant/libvirt/create-vagrant-libvirt-box 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
-    - > 
-      utils/vagrant/libvirt/create-vagrant-libvirt-box 
-      debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-official-$(date '+%Y%m%d')-${CI_PIPELINE_IID}.raw
-  variables:
-    CLOUD_ARCH: amd64
-  artifacts:
-    name: debian-${CLOUD_RELEASE}-${CLOUD_VENDOR}-${CLOUD_ARCH}-libvirt
-    expire_in: 2 days
-    paths:
-      # this fails with Uploading artifacts to coordinator... too large archive (HTTP 413)
-      #- '*.box'
-      - '*.build.json'
-      - '*.info'
+stretch-vagrant-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["stretch-vagrant-amd64 build"]
 
-vagrant testing virtualbox box:
-  extends: .virtualbox box
-  variables:
-    CLOUD_RELEASE: testing
-    CLOUD_VENDOR: vagrant
+stretch-vagrant-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["stretch-vagrant-amd64 test-virtualbox"]
+  when: manual
 
-vagrantcontrib testing virtualbox box:
-  extends: .virtualbox box
-  variables:
-    CLOUD_RELEASE: testing
-    CLOUD_VENDOR: vagrantcontrib
+stretch-vagrant-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["stretch-vagrant-amd64 test-virtualbox"]
+  when: manual
+stretch-vagrantcontrib-amd64 build:
+  extends: .build
+  when: manual
 
-vagrant testing libvirt box:
-  extends: .libvirt box
-  variables:
-    CLOUD_RELEASE: testing
-    CLOUD_VENDOR: vagrant
+stretch-vagrantcontrib-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["stretch-vagrantcontrib-amd64 build"]
+
+stretch-vagrantcontrib-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["stretch-vagrantcontrib-amd64 test-libvirt"]
+  when: manual
+
+stretch-vagrantcontrib-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["stretch-vagrantcontrib-amd64 test-libvirt"]
+  when: manual
+
+stretch-vagrantcontrib-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["stretch-vagrantcontrib-amd64 build"]
+
+stretch-vagrantcontrib-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["stretch-vagrantcontrib-amd64 test-virtualbox"]
+  when: manual
+
+stretch-vagrantcontrib-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["stretch-vagrantcontrib-amd64 test-virtualbox"]
+  when: manual
+buster-vagrant-amd64 build:
+  extends: .build
+
+buster-vagrant-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["buster-vagrant-amd64 build"]
+
+buster-vagrant-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["buster-vagrant-amd64 test-libvirt"]
+  when: manual
+
+buster-vagrant-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["buster-vagrant-amd64 test-libvirt"]
+  when: manual
+
+buster-vagrant-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["buster-vagrant-amd64 build"]
+
+buster-vagrant-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["buster-vagrant-amd64 test-virtualbox"]
+  when: manual
+
+buster-vagrant-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["buster-vagrant-amd64 test-virtualbox"]
+  when: manual
+buster-vagrantcontrib-amd64 build:
+  extends: .build
+
+buster-vagrantcontrib-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["buster-vagrantcontrib-amd64 build"]
+
+buster-vagrantcontrib-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["buster-vagrantcontrib-amd64 test-libvirt"]
+  when: manual
+
+buster-vagrantcontrib-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["buster-vagrantcontrib-amd64 test-libvirt"]
+  when: manual
+
+buster-vagrantcontrib-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["buster-vagrantcontrib-amd64 build"]
+
+buster-vagrantcontrib-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["buster-vagrantcontrib-amd64 test-virtualbox"]
+  when: manual
+
+buster-vagrantcontrib-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["buster-vagrantcontrib-amd64 test-virtualbox"]
+  when: manual
+bullseye-vagrant-amd64 build:
+  extends: .build
+
+bullseye-vagrant-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["bullseye-vagrant-amd64 build"]
+
+bullseye-vagrant-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["bullseye-vagrant-amd64 test-libvirt"]
+  when: manual
+
+bullseye-vagrant-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["bullseye-vagrant-amd64 test-libvirt"]
+  when: manual
+
+bullseye-vagrant-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["bullseye-vagrant-amd64 build"]
+
+bullseye-vagrant-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["bullseye-vagrant-amd64 test-virtualbox"]
+  when: manual
+
+bullseye-vagrant-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["bullseye-vagrant-amd64 test-virtualbox"]
+  when: manual
+testing-vagrant-amd64 build:
+  extends: .build
+
+testing-vagrant-amd64 test-libvirt:
+  extends: .test libvirt
+  needs: ["testing-vagrant-amd64 build"]
+
+testing-vagrant-amd64 upload-libvirt:
+  extends: .upload libvirt
+  needs: ["testing-vagrant-amd64 test-libvirt"]
+  when: manual
+
+testing-vagrant-amd64 upload-sandbox-libvirt:
+  extends: .upload-sandbox libvirt
+  needs: ["testing-vagrant-amd64 test-libvirt"]
+  when: manual
+
+testing-vagrant-amd64 test-virtualbox:
+  extends: .test virtualbox
+  needs: ["testing-vagrant-amd64 build"]
+
+testing-vagrant-amd64 upload-virtualbox:
+  extends: .upload virtualbox
+  needs: ["testing-vagrant-amd64 test-virtualbox"]
+  when: manual
+
+testing-vagrant-amd64 upload-sandbox-virtualbox:
+  extends: .upload-sandbox virtualbox
+  needs: ["testing-vagrant-amd64 test-virtualbox"]
+  when: manual
