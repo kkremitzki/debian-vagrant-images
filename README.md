@@ -3,7 +3,12 @@
 This repository aims to build the Debian Vagrant base boxes available at 
 https://app.vagrantup.com/debian
 See that URL for the end user documentation.
-This repository is based on a fork of https://salsa.debian.org/cloud-team/debian-cloud-images and tries to minimize changes to vagrant specific changes when possible.
+This repository is based on https://salsa.debian.org/cloud-team/debian-cloud-images with the following Vagrant specific enhancements:
+
+- priority based package selection: all packages with Priority Essential, Important, Standard are installed, to match the package selection done by the debian-installer
+- generation of a standard OVF file for VirtualBox OVA import
+- generation of package in box format, including a default Vagrantfile
+- end to end test suite for VirtualBox and libvirt boxes (bare metal hardware is needed for running the test suite for VirtualBox)
 
 ## Getting started
 
