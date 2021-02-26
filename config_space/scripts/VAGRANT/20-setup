@@ -38,6 +38,18 @@ echo "$release" > $target/etc/hostname
 sed -i "/127.0.0.1	localhost/a 127.0.0.2	$release" $target/etc/hosts
 
 #######################################################################
+# install additional packages on buster for compatibility
+#######################################################################
+# On buster and contrib-buster, we install some additional packages
+# to ensure compatibility with former images
+if ifclass BUSTER; then
+  chroot $target apt-get install --yes busybox console-setup discover eject firmware-linux-free  task-english task-ssh-server installation-report xauth publicsuffix powermgmt-base pinentry-curses os-prober laptop-detect iso-codes geoip-database libsasl2-modules
+  if ifclass VAGRANTCONTRIB; then
+    chroot $target apt-get install --yes build-essential devscripts
+  fi
+fi
+
+#######################################################################
 # generate sshd host keys on first boot
 #######################################################################
 chroot $target systemctl enable generate-sshd-host-keys.service
