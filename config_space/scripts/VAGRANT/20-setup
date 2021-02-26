@@ -26,8 +26,16 @@ chmod 0440 $target/etc/sudoers.d/vagrant
 #######################################################################
 # setup resolvable hostname
 #######################################################################
-echo "debian" > $target/etc/hostname
-sed -i '/127.0.0.1	localhost/a 127.0.0.2	debian' $target/etc/hosts
+# hostname is the name of the release, as this was historically done
+# on Vagrant images
+if ifclass VAGRANTCONTRIB; then
+	hostname="contrib-$release"
+else
+	hostname="$release"
+fi
+
+echo "$release" > $target/etc/hostname
+sed -i "/127.0.0.1	localhost/a 127.0.0.2	$release" $target/etc/hosts
 
 #######################################################################
 # generate sshd host keys on first boot
