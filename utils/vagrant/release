@@ -81,6 +81,16 @@ def build_upload_command(rawdisk, infos, version, namespace, do_release):
 
     if infos['vendor'] == 'vagrantcontrib':
         box_name = 'contrib-' + box_name
+
+    description = {
+        'testing64': 'Debian "testing"',
+        'bullseye64': 'Debian 11 "bullseye"',
+        'buster64': 'Debian 10 "buster"',
+        'contrib-buster64': 'Debian 10 "buster" with vboxsf contrib module for synced folders'
+    }
+    command.append('--short-description')
+    command.append(description[box_name])
+
     command.append(namespace + '/' + box_name)
     command.append(version)
     command.append(infos['hypervisor'])
