@@ -86,3 +86,5 @@ Once you have been given access, connect using:
 Then look into `/srv/ci-runner-scripts/bin/debvagrant` which should be easy to follow.
 
 If you need an node for interactive usage, use `/srv/ci-runner-scripts/bin/debvagrant --get`
+
+Note that due to [this bug](https://gitlab.com/gitlab-org/gitlab/-/issues/223012), the GitLab pipelines page is really hard to read. It is recommended to use [a custom CSS to work around this](https://bascht.com/tech/2020/11/18/better-gitlab-pipeline-ux-with-custom-css/)
