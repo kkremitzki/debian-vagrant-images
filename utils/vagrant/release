@@ -77,8 +77,6 @@ def build_upload_command(rawdisk, infos, version, namespace, do_release):
         command.append('--release')
 
     box_name = infos['dist']
-    if VERSIONS[box_name] == 'testing':
-        box_name = 'testing'
     box_name += '64'
 
     if infos['vendor'] == 'vagrantcontrib':
