@@ -49,6 +49,11 @@ sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames
 chroot $target update-grub
 
 #######################################################################
+# set grub install device in debconf on first boot
+#######################################################################
+chroot $target systemctl enable set-grub-install-device.service
+
+#######################################################################
 # speed tweaks
 #######################################################################
 

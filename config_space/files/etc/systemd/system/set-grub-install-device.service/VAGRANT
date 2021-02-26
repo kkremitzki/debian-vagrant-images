@@ -1,0 +1,15 @@
+# See bug #982591
+
+[Unit]
+Description=Set Grub install device in debconf on first boot
+# Both jobs need to modify the debconf DB, so we force an ordering to avoid a race condition and failures
+After=generate-sshd-host-keys.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo grub-pc grub-pc/install_devices multiselect $(lsblk --paths --noheadings --output PKNAME $(findmnt --noheadings --output SOURCE /)) | debconf-set-selections'
+RemainAfterExit=true
+ExecStartPost=/bin/systemctl disable set-grub-install-device.service
+
+[Install]
+WantedBy=multi-user.target
