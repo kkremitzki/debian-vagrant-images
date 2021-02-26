@@ -297,6 +297,8 @@ class Check:
         else:
             self.classes.add('LINUX_IMAGE_BASE')
         self.classes.add(self.release.get_default_grub_class(self.arch.name, self.vendor.name))
+        if not (self.vendor.name == 'vagrant' or self.vendor.name == 'vagrantcontrib'):
+            self.classes.add('HOTPLUG_NICS')
         self.classes.add('LAST')
 
 
