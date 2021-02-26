@@ -43,7 +43,7 @@ stages:
   - grid5000-shell
   only:
     refs:
-      - g5kci
+      - master
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-virtualbox
 
@@ -54,7 +54,7 @@ stages:
   - grid5000-shell
   only:
     refs:
-      - g5kci
+      - master
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-libvirt
 
@@ -62,9 +62,6 @@ stages:
   stage: upload
   tags:
   - grid5000-shell
-  only:
-    refs:
-      - g5kci
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-virtualbox
 
@@ -73,9 +70,6 @@ stages:
   stage: upload
   tags:
   - grid5000-shell
-  only:
-    refs:
-      - g5kci
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
 EOF
