@@ -74,18 +74,13 @@ stages:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
 EOF
 
-['stretch', 'buster', 'bullseye', 'testing'].each do |dist|
+['buster', 'bullseye', 'testing'].each do |dist|
   ['vagrant', 'vagrantcontrib'].each do |type|
     next if ['testing', 'bullseye'].include?(dist) and type == 'vagrantcontrib' # not needed anymore because vboxsf is included in the vanilla kernel
     fd.puts <<-EOF
 #{dist}-#{type}-amd64 build:
   extends: .build
     EOF
-    if ['jessie','stretch'].include?(dist) # for jessie and stretch, do not run pipeline by default
-      fd.puts <<-EOF
-  when: manual
-      EOF
-    end
     fd.puts <<-EOF
 
 #{dist}-#{type}-amd64 test-libvirt:
