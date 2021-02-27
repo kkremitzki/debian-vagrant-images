@@ -43,6 +43,12 @@ sed -i "/127.0.0.1	localhost/a 127.0.0.2	$release" $target/etc/hosts
 chroot $target systemctl enable generate-sshd-host-keys.service
 
 #######################################################################
+# Use traditional network interface names
+#######################################################################
+sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' $target/etc/default/grub
+chroot $target update-grub
+
+#######################################################################
 # speed tweaks
 #######################################################################
 
