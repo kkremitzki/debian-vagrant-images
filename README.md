@@ -87,4 +87,26 @@ Then look into `/srv/ci-runner-scripts/bin/debvagrant` which should be easy to f
 
 If you need an node for interactive usage, use `/srv/ci-runner-scripts/bin/debvagrant --get`
 
-Note that due to [this bug](https://gitlab.com/gitlab-org/gitlab/-/issues/223012), the GitLab pipelines page is really hard to read. It is recommended to use [a custom CSS to work around this](https://bascht.com/tech/2020/11/18/better-gitlab-pipeline-ux-with-custom-css/)
+Note that due to [this gitlab issue](https://gitlab.com/gitlab-org/gitlab/-/issues/223012), the GitLab pipelines page is really hard to read. It is recommended to use [a custom CSS to work around this](https://bascht.com/tech/2020/11/18/better-gitlab-pipeline-ux-with-custom-css/), that is, set up a custom CSS for <https://salsa.debian.org/cloud-team/debian-vagrant-images/-/pipelines/>
+with:
+```
+.gl-label {
+    border-radius: 0.35rem
+}
+
+.pipeline-graph .build {
+    width: auto;
+}
+
+.pipeline-graph .gl-text-truncate {
+    overflow: visible;
+}
+
+.pipeline-graph .build .build-content {
+    border-radius: 10px;
+}
+
+.pipeline-graph li.build[id*="sandbox"] .ci-job-component .menu-item {
+    box-shadow: 0px 0px 5px #3df006;
+}
+```
