@@ -5,7 +5,7 @@ from os import environ, path
 
 VERSIONS = {
     'buster': '10',
-    'bullseye': 'testing',
+    'bullseye': '11',
     'testing': 'testing'  # allow access to testing via nickname and realname
 }
 
