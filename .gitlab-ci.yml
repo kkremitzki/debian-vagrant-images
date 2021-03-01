@@ -100,20 +100,6 @@ buster-vagrant-amd64 upload-sandbox-virtualbox:
 buster-vagrantcontrib-amd64 build:
   extends: .build
 
-buster-vagrantcontrib-amd64 test-libvirt:
-  extends: .test libvirt
-  needs: ["buster-vagrantcontrib-amd64 build"]
-
-buster-vagrantcontrib-amd64 upload-libvirt:
-  extends: .upload libvirt
-  needs: ["buster-vagrantcontrib-amd64 test-libvirt"]
-  when: manual
-
-buster-vagrantcontrib-amd64 upload-sandbox-libvirt:
-  extends: .upload-sandbox libvirt
-  needs: ["buster-vagrantcontrib-amd64 test-libvirt"]
-  when: manual
-
 buster-vagrantcontrib-amd64 test-virtualbox:
   extends: .test virtualbox
   needs: ["buster-vagrantcontrib-amd64 build"]

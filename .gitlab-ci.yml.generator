@@ -81,7 +81,8 @@ EOF
 #{dist}-#{type}-amd64 build:
   extends: .build
     EOF
-    fd.puts <<-EOF
+    if type != 'vagrantcontrib' # no need to test/upload contrib-* boxes for libvirt
+      fd.puts <<-EOF
 
 #{dist}-#{type}-amd64 test-libvirt:
   extends: .test libvirt
@@ -96,6 +97,9 @@ EOF
   extends: .upload-sandbox libvirt
   needs: ["#{dist}-#{type}-amd64 test-libvirt"]
   when: manual
+      EOF
+    end
+    fd.puts <<-EOF
 
 #{dist}-#{type}-amd64 test-virtualbox:
   extends: .test virtualbox
