@@ -1,6 +1,6 @@
 # FAI vagrant image builder
 
-This repository aims to build the Debian Vagrant base boxes available at 
+This repository contains the code to build the Debian Vagrant base boxes available at
 https://app.vagrantup.com/debian
 See that URL for the end user documentation.
 This repository is based on https://salsa.debian.org/cloud-team/debian-cloud-images with the following Vagrant specific enhancements:
@@ -13,15 +13,10 @@ This repository is based on https://salsa.debian.org/cloud-team/debian-cloud-ima
 ## Getting started
 
 You will need a checkout of this repository on your disk and a recent fai-server
-package (at least 5.7) installed. Install the necessary fai packages without
-the recommends (which avoids turning your host into a DHCP server!).
-You also need python3-libcloud from Buster or newer.
-
+package (at least 5.7) installed.
 ```
   # git clone https://salsa.debian.org/cloud-team/debian-vagrant-images.git
-  # sudo apt install --no-install-recommends ca-certificates debsums dosfstools \
-    fai-server fai-setup-storage make python3 python3-libcloud python3-marshmallow \
-    python3-pytest python3-yaml qemu-utils udev
+  # sudo make install-build-deps
 ```
 
   Call `make help` and follow the instructions
@@ -34,16 +29,20 @@ Example 1:
 
 This will create some log output and the following files:
 
-- debian-bullseye-nocloud-amd64-official-20200421-1.build.json
-- debian-bullseye-nocloud-amd64-official-20200421-1.info
-- debian-bullseye-nocloud-amd64-official-20200421-1.raw
-- debian-bullseye-nocloud-amd64-official-20200421-1.raw.tar
+- debian-bullseye-vagrant-amd64-official-20210409-1.info
+- debian-bullseye-vagrant-amd64-official-20210409-1.build.junit.xml
+- debian-bullseye-vagrant-amd64-official-20210409-1.raw
+- debian-bullseye-vagrant-amd64-official-20210409-1.tar
 
 ## Boxes creation
 
 To convert the raw disk images into a usable vagrant box you will need
 ```
 # apt install libxml-writer-perl libguestfs-perl uuid-runtime
+```
+then call the target
+```
+make build-virtualbox-bullseye-vagrant-amd64
 ```
 
 ## E2E tests
@@ -68,8 +67,8 @@ Then if you call
 ```
    #  make NAMESPACE=debian IS_RELEASE=norelease upload-virtualbox-bullseye-vagrant-amd64
 ```
-The box virtualbox-debian-bullseye-vagrant-amd64-official-20200421-1.box will be uploaded to 
-'https://app.vagrantup.com/debian/', and you will have to release it manually on the app.vagrantup.com/debian/website
+The box virtualbox-debian-bullseye-vagrant-amd64-official-20200421-1.box will be uploaded to
+'https://app.vagrantup.com/debian/', and you will have to release it manually on the app.vagrantup.com/debian website
 
 # Continuous Integration
 
