@@ -9,6 +9,22 @@ stages:
   - test
   - upload
 
+.no_schedules_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+       when: never
+    - if: $CI_PIPELINE_SOURCE == "web"
+       when: never
+    - when: always
+
+.schedules_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+       when: always
+    - if: $CI_PIPELINE_SOURCE == "web"
+       when: always
+    - when: never
+
 .build:
   stage: build
   tags:
@@ -22,8 +38,11 @@ stages:
       - '*.info'
     reports:
       junit: '*.build.junit.xml'
+  rules:
+    - !reference [.no_schedules_rules, rules]
   except:
     - schedules
+    - trigger
 
 .test virtualbox:
   stage: test
@@ -31,8 +50,6 @@ stages:
    - grid5000-shell
   script:
    - /srv/ci-runner-scripts/bin/debvagrant --test-virtualbox
-  except:
-    - schedules
 
 .test libvirt:
   stage: test
@@ -81,6 +98,8 @@ stages:
   stage: build
   tags:
   - grid5000-shell
+  rules:
+    - !reference [.schedules_rules, rules]
 
 # ensure that vagrant+virtualbox works with the kernel from bpo
 regtest-bpo:
