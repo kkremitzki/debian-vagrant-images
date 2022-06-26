@@ -65,25 +65,21 @@ stages:
   stage: upload
   tags:
   - grid5000-shell
-  only:
-    refs:
-      - master
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-virtualbox
   rules:
     - !reference [.no_schedules_manual_rules, rules]
+    - if: $CI_COMMIT_BRANCH == "master"
 
 .upload libvirt:
   stage: upload
   tags:
   - grid5000-shell
-  only:
-    refs:
-      - master
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-libvirt
   rules:
     - !reference [.no_schedules_manual_rules, rules]
+    - if: $CI_COMMIT_BRANCH == "master"
 
 .upload-sandbox virtualbox:
   stage: upload
