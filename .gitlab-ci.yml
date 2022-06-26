@@ -38,6 +38,8 @@ stages:
    - grid5000-shell
   script:
    - /srv/ci-runner-scripts/bin/debvagrant --test-virtualbox
+  rules:
+    - !reference [.no_schedules_rules, rules]
 
 .test libvirt:
   stage: test
@@ -45,6 +47,8 @@ stages:
    - grid5000-shell
   script:
    - /srv/ci-runner-scripts/bin/debvagrant --test-libvirt
+  rules:
+    - !reference [.no_schedules_rules, rules]
 
 .upload virtualbox:
   stage: upload
@@ -55,7 +59,8 @@ stages:
       - master
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-virtualbox
-
+  rules:
+    - !reference [.no_schedules_rules, rules]
 
 .upload libvirt:
   stage: upload
@@ -66,6 +71,8 @@ stages:
       - master
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-libvirt
+  rules:
+    - !reference [.no_schedules_rules, rules]
 
 .upload-sandbox virtualbox:
   stage: upload
@@ -73,7 +80,8 @@ stages:
   - grid5000-shell
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-virtualbox
-
+  rules:
+    - !reference [.no_schedules_rules, rules]
 
 .upload-sandbox libvirt:
   stage: upload
@@ -81,6 +89,8 @@ stages:
   - grid5000-shell
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
+  rules:
+    - !reference [.no_schedules_rules, rules]
 
 .regtest:
   stage: build
