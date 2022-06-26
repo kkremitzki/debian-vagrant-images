@@ -7,17 +7,17 @@ stages:
 .no_schedules_rules:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
-       when: never
+      when: never
     - if: $CI_PIPELINE_SOURCE == "web"
-       when: never
+      when: never
     - when: always
 
 .schedules_rules:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
-       when: always
+      when: always
     - if: $CI_PIPELINE_SOURCE == "web"
-       when: always
+      when: always
     - when: never
 
 .build:
