@@ -40,9 +40,6 @@ stages:
       junit: '*.build.junit.xml'
   rules:
     - !reference [.no_schedules_rules, rules]
-  except:
-    - schedules
-    - trigger
 
 .test virtualbox:
   stage: test
