@@ -72,18 +72,20 @@ stages:
   - grid5000-shell
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
+
 EOF
 
-['buster', 'bullseye', 'testing'].each do |dist|
+[ 'buster', 'bullseye', 'testing'].each do |dist|
   ['vagrant', 'vagrantcontrib'].each do |type|
+    next if dist == 'buster' and type == 'vagrantcontrib' # not supported anymore
     next if ['testing', 'bullseye'].include?(dist) and type == 'vagrantcontrib' # not needed anymore because vboxsf is included in the vanilla kernel
     fd.puts <<-EOF
 #{dist}-#{type}-amd64 build:
   extends: .build
+
     EOF
     if type != 'vagrantcontrib' # no need to test/upload contrib-* boxes for libvirt
       fd.puts <<-EOF
-
 #{dist}-#{type}-amd64 test-libvirt:
   extends: .test libvirt
   needs: ["#{dist}-#{type}-amd64 build"]
@@ -97,10 +99,10 @@ EOF
   extends: .upload-sandbox libvirt
   needs: ["#{dist}-#{type}-amd64 test-libvirt"]
   when: manual
+
       EOF
     end
     fd.puts <<-EOF
-
 #{dist}-#{type}-amd64 test-virtualbox:
   extends: .test virtualbox
   needs: ["#{dist}-#{type}-amd64 build"]
@@ -114,6 +116,7 @@ EOF
   extends: .upload-sandbox virtualbox
   needs: ["#{dist}-#{type}-amd64 test-virtualbox"]
   when: manual
+
 EOF
   end
 end
