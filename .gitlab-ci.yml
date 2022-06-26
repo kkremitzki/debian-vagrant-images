@@ -10,6 +10,12 @@ stages:
       when: never
     - when: always
 
+.no_schedules_manual_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api" || $CI_PIPELINE_SOURCE == "trigger"
+      when: never
+    - when: manual
+
 .schedules_rules:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api" || $CI_PIPELINE_SOURCE == "trigger"
@@ -60,7 +66,7 @@ stages:
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-virtualbox
   rules:
-    - !reference [.no_schedules_rules, rules]
+    - !reference [.no_schedules_manual_rules, rules]
 
 .upload libvirt:
   stage: upload
@@ -72,7 +78,7 @@ stages:
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-libvirt
   rules:
-    - !reference [.no_schedules_rules, rules]
+    - !reference [.no_schedules_manual_rules, rules]
 
 .upload-sandbox virtualbox:
   stage: upload
@@ -81,7 +87,7 @@ stages:
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-virtualbox
   rules:
-    - !reference [.no_schedules_rules, rules]
+    - !reference [.no_schedules_manual_rules, rules]
 
 .upload-sandbox libvirt:
   stage: upload
@@ -90,7 +96,7 @@ stages:
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
   rules:
-    - !reference [.no_schedules_rules, rules]
+    - !reference [.no_schedules_manual_rules, rules]
 
 .regtest:
   stage: build
