@@ -22,6 +22,8 @@ stages:
       - '*.info'
     reports:
       junit: '*.build.junit.xml'
+  except:
+    - schedules
 
 .test virtualbox:
   stage: test
