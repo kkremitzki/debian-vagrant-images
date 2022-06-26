@@ -1,0 +1,8 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/stretch64"
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get -s dist-upgrade
+  #  ! apt-get -s dist-upgrade | grep -q linux-image
+  SHELL
+end

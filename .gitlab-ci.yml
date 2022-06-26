@@ -70,6 +70,31 @@ stages:
   script:
   - /srv/ci-runner-scripts/bin/debvagrant --upload-sandbox-libvirt
 
+.regtest:
+  stage: build
+  tags:
+  - grid5000-shell
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# ensure that vagrant+virtualbox works with the kernel from bpo
+regtest-bpo:
+  extends: .regtest
+  script:
+  - /srv/ci-runner-scripts/bin/test-debian-vagrant-image-bullseye-bpo
+
+regtest-libvirt:
+  extends: .regtest
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --regtest-libvirt
+
+regtest-virtualbox:
+  extends: .regtest
+  script:
+   - /srv/ci-runner-scripts/bin/debvagrant --regtest-virtualbox
+
 buster-vagrant-amd64 build:
   extends: .build
 

@@ -1,0 +1,33 @@
+#!/usr/bin/ruby
+
+require 'fileutils'
+
+%w{buster64 contrib-buster64 testing64 stretch64 contrib-stretch64 bullseye64}.each do |img|
+  FileUtils::mkdir_p(img)
+  if %w{testing64}.include?(img)
+    File::open("#{img}/Vagrantfile", "w") do |fd|
+      fd.puts <<-EOF
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/#{img}"
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get -s dist-upgrade
+  SHELL
+end
+  EOF
+    end
+  else
+    File::open("#{img}/Vagrantfile", "w") do |fd|
+      fd.puts <<-EOF
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/#{img}"
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get -s dist-upgrade
+  #  ! apt-get -s dist-upgrade | grep -q linux-image
+  SHELL
+end
+  EOF
+    end
+  end
+end
