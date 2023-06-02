@@ -6,6 +6,7 @@ from os import environ, path
 VERSIONS = {
     'buster': '10',
     'bullseye': '11',
+    'bookworm': '12',
     'testing': 'testing'  # allow access to testing via nickname and realname
 }
 
@@ -84,6 +85,7 @@ def build_upload_command(rawdisk, infos, version, namespace, do_release):
 
     description = {
         'testing64': 'Debian "testing"',
+        'bookworm64': 'Debian 12 "bookworm"',
         'bullseye64': 'Debian 11 "bullseye"',
         'buster64': 'Debian 10 "buster"',
         'contrib-buster64': 'Debian 10 "buster" with vboxsf contrib module for synced folders'

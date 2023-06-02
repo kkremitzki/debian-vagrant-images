@@ -126,6 +126,12 @@ ReleaseEnum = enum.Enum(  # type:ignore
             'fai_classes': ('BULLSEYE', ),
             'arch_supports_linux_image_cloud': ('amd64',),
         },
+        'bookworm': {
+            'id': '12',
+            'baseid': '12',
+            'fai_classes': ('BOOKWORM', ),
+            'arch_supports_linux_image_cloud': ('amd64',),
+        },
         'testing': {
             'id': 'testing',
             'baseid': 'testing',

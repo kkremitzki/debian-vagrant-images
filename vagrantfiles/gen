@@ -2,7 +2,7 @@
 
 require 'fileutils'
 
-%w{buster64 contrib-buster64 testing64 bullseye64}.each do |img|
+%w{buster64 contrib-buster64 testing64 bullseye64 bookworm64}.each do |img|
   FileUtils::mkdir_p(img)
   if %w{testing64}.include?(img)
     File::open("#{img}/Vagrantfile", "w") do |fd|
