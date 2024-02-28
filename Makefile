@@ -30,6 +30,7 @@ install-build-deps:
     fai-server fai-setup-storage make python3 python3-libcloud python3-marshmallow \
     python3-pytest python3-yaml qemu-utils udev \
     libguestfs-perl libxml-writer-perl uuid-runtime
+       sudo sed -i '\#fai-divert -a /sbin/init# d' /usr/lib/fai/updatebase # hack for #1056151
 
 build-libvirt-%:
 	# if raw disk image is missing, build it
