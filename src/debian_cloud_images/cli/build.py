@@ -182,7 +182,7 @@ VendorEnum = enum.Enum(  # type:ignore
             'fai_classes': ('NOCLOUD', ),
         },
         'vagrant': {
-            'fai_size': '20G',
+            'fai_size': '100G',
             'fai_classes': ('VAGRANT', ),
             'use_linux_image_cloud': False,
         },
