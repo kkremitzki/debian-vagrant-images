@@ -42,4 +42,8 @@ EOF
   vagrant ssh -c "sudo apt-get update"
   vagrant ssh -c "sudo apt-get --quiet --yes install figlet \
      && ( lsb_release --release --codename ) | figlet"
+  for i in $(seq 1 10); do
+    vagrant destroy -f
+    vagrant up
+  done
 )
