@@ -1,5 +1,5 @@
-apt_cdn=https://deb.debian.org
-security_cdn=https://security.debian.org
+apt_cdn=http://debian-mirror.kwk.systems
+security_cdn=http://debian-security-mirror.kwk.systems
 KEYMAP=utf-8
 CONSOLEFONT=
 # errors in tasks greater than this value will cause the installation to stop
