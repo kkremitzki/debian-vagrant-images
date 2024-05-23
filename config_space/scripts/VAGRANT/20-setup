@@ -5,23 +5,23 @@ set -ex
 #######################################################################
 # setup vagrant user
 #######################################################################
-chroot $target id vagrant >/dev/null 2>&1 || chroot $target useradd --create-home --uid 1000 --shell /bin/bash vagrant
-mkdir -p $target/home/vagrant/.ssh
-chmod 700 $target/home/vagrant/.ssh
-cat > $target/home/vagrant/.ssh/authorized_keys << EOF
-ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+chroot $target id kurt >/dev/null 2>&1 || chroot $target useradd --create-home --uid 1000 --shell /bin/bash kurt
+mkdir -p $target/home/kurt/.ssh
+chmod 700 $target/home/kurt/.ssh
+cat > $target/home/kurt/.ssh/authorized_keys << EOF
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== kurt insecure public key
 EOF
-chmod 600 $target/home/vagrant/.ssh/authorized_keys
-chroot $target chown -R vagrant:vagrant /home/vagrant/.ssh
+chmod 600 $target/home/kurt/.ssh/authorized_keys
+chroot $target chown -R kurt:kurt /home/kurt/.ssh
 
 #######################################################################
 # setup passwordless sudo for vagrant user
 #######################################################################
 chroot $target apt-get install --yes sudo
-cat > $target/etc/sudoers.d/vagrant <<EOF
-vagrant ALL=(ALL) NOPASSWD:ALL
+cat > $target/etc/sudoers.d/kurt <<EOF
+kurt ALL=(ALL) NOPASSWD:ALL
 EOF
-chmod 0440 $target/etc/sudoers.d/vagrant
+chmod 0440 $target/etc/sudoers.d/kurt
 
 #######################################################################
 # setup resolvable hostname
