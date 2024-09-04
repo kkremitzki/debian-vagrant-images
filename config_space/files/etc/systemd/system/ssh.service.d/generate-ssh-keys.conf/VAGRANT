@@ -1,0 +1,6 @@
+[Service]
+# remove existing ExecStartPre
+ExecStartPre=
+ExecStartPre=/usr/local/sbin/vagrant-generate-ssh-host-keys
+# re-add existing ExecStartPre line (this one must be run after the generation of keys)
+ExecStartPre=/usr/sbin/sshd -t

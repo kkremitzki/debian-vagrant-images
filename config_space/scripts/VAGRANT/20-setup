@@ -50,11 +50,6 @@ if ifclass BUSTER; then
 fi
 
 #######################################################################
-# generate sshd host keys on first boot
-#######################################################################
-chroot $target systemctl enable generate-sshd-host-keys.service
-
-#######################################################################
 # Use traditional network interface names
 #######################################################################
 sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' $target/etc/default/grub
@@ -72,3 +67,7 @@ chroot $target systemctl enable set-grub-install-device.service
 # Prevent DNS resolution (speed up logins)
 echo "\n# debian vagrant box speedup\nUseDNS no" \
   >> $target/etc/ssh/sshd_config
+
+# Make the SSH key generation script executable
+chmod 755 $target/usr/local/sbin/vagrant-generate-ssh-host-keys
+
