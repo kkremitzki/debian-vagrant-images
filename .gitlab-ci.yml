@@ -117,37 +117,6 @@ regtest-virtualbox:
   script:
    - /srv/ci-runner-scripts/bin/debvagrant --regtest-virtualbox
 
-buster-vagrant-amd64 build:
-  extends: .build
-
-buster-vagrant-amd64 test-libvirt:
-  extends: .test libvirt
-  needs: ["buster-vagrant-amd64 build"]
-
-buster-vagrant-amd64 upload-libvirt:
-  extends: .upload libvirt
-  needs: ["buster-vagrant-amd64 test-libvirt"]
-  when: manual
-
-buster-vagrant-amd64 upload-sandbox-libvirt:
-  extends: .upload-sandbox libvirt
-  needs: ["buster-vagrant-amd64 test-libvirt"]
-  when: manual
-
-buster-vagrant-amd64 test-virtualbox:
-  extends: .test virtualbox
-  needs: ["buster-vagrant-amd64 build"]
-
-buster-vagrant-amd64 upload-virtualbox:
-  extends: .upload virtualbox
-  needs: ["buster-vagrant-amd64 test-virtualbox"]
-  when: manual
-
-buster-vagrant-amd64 upload-sandbox-virtualbox:
-  extends: .upload-sandbox virtualbox
-  needs: ["buster-vagrant-amd64 test-virtualbox"]
-  when: manual
-
 bullseye-vagrant-amd64 build:
   extends: .build
 

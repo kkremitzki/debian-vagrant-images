@@ -124,9 +124,8 @@ regtest-virtualbox:
 
 EOF
 
-[ 'buster', 'bullseye', 'bookworm', 'testing'].each do |dist|
+[ 'bullseye', 'bookworm', 'testing'].each do |dist|
   ['vagrant', 'vagrantcontrib'].each do |type|
-    next if dist == 'buster' and type == 'vagrantcontrib' # not supported anymore
     next if ['testing', 'bullseye', 'bookworm'].include?(dist) and type == 'vagrantcontrib' # not needed anymore because vboxsf is included in the vanilla kernel
     fd.puts <<-EOF
 #{dist}-#{type}-amd64 build:
