@@ -112,6 +112,11 @@ regtest-bullseye-bpo:
   script:
   - /srv/ci-runner-scripts/bin/test-debian-vagrant-image-bullseye-bpo
 
+regtest-bookworm:
+  extends: .regtest
+  script:
+  - /srv/ci-runner-scripts/bin/test-debian-vagrant-image-bookworm
+
 regtest-bookworm-bpo:
   extends: .regtest
   script:
