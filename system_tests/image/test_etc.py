@@ -30,6 +30,9 @@ class TestEtc:
             'tcpdump',
             # From package uuid-runtime
             'uuidd',
+            # Debian Trixie change 
+            # Ref: https://q-funk.blogspot.com/2024/07/dhcpcd-replacing-dhclient-for-trixie-or.html
+            'dhcpcd',
             # For vagrant boxes
             'kurt'
         ):
