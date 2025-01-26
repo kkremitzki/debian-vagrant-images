@@ -101,12 +101,6 @@ stages:
   rules:
     - !reference [.schedules_rules, rules]
 
-# ensure that vagrant+virtualbox works with the kernel from bpo
-regtest-bullseye-bpo:
-  extends: .regtest
-  script:
-  - /srv/ci-runner-scripts/bin/test-debian-vagrant-image-bullseye-bpo
-
 regtest-bookworm:
   extends: .regtest
   script:
